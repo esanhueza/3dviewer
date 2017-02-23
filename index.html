@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title> 3D Model Creator </title>
+		<link href="css/flexbox.min.css" rel="stylesheet" type="text/css">
+    <link href="index.css" rel="stylesheet" type="text/css">
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<div class="row">
+			<div id="toolbar" class="col-md-offset-10 col-md-2 col-xs-12">
+				<ul id="mesh-list">
+				</ul>
+				<form id="mesh-form">
+					<label for="width">Ancho: </label>
+					<input type="number" min="0" name="width" value="1" placeholder="Width">
+					<br>
+					<label for="height">Altura: </label>
+					<input type="number" min="0" name="height" value="1" placeholder="Height">
+					<br>
+					<label for="long">Largo: </label>
+					<input type="number" min="0" name="long" value="1" placeholder="Long">
+					<br>
+					<label for="x">X: </label>
+					<input type="number" name="x" value="1" placeholder="X">
+					<br>
+					<label for="y">Y: </label>
+					<input type="number" name="y" value="1" placeholder="Y">
+					<br>
+					<label for="z">Z: </label>
+					<input type="number" name="z" value="1" placeholder="Z">
+					<br>
+					<label for="color">Color: </label>
+					<input type="color" name="color"> 
+				</form>
+			</div>
+		  <div id="3d-section" class="col-md-10 col-xs-12">
+
+		  </div>
+		</div>
+		<div id="piece-name" class="info">
+
+		</div>
+		<script src="js/three.min.js"></script>
+		<script src="js/example.js"></script>
+
+	</body>
+</html>
