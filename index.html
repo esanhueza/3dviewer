@@ -19,10 +19,12 @@
     <![endif]-->
   </head>
   <body>
+
+
 		<div class="container-fluid">
       <br>
 			<div class="row">
-        <div class="col-xs-12 col-md-8 ">
+        <div class="col-xs-12 col-md-7 ">
           <div class="panel panel-default">
             <div class="panel-body fixed-panel">
               <div id="viewer">
@@ -30,7 +32,7 @@
             </div>
           </div>
         </div>
-				<div id="toolbar" class="col-md-offset-8 col-md-4 col-xs-12">
+				<div id="toolbar" class="col-md-offset-7 col-md-5 col-xs-12">
 					<div class="panel panel-default">
 					  <div class="panel-body">
                 <!-- Table -->
@@ -40,7 +42,7 @@
                       <th class="col-md-1">#</th>
                       <th class="col-md-2">TAG</th>
                       <th class="col-md-1">Ancho</th>
-                      <th class="col-md-1">Altura</th>
+                      <th class="col-md-1">Espesor</th>
                       <th class="col-md-1">Largo</th>
                       <th class="col-md-1">X</th>
                       <th class="col-md-1">Y</th>
@@ -54,8 +56,39 @@
                 </table>
 					  </div>
 					</div>
-          <div id="tools">
-            <input id="grid-check" type="checkbox" name="grid" value=""> Grid <br>
+          <div id="tools" class="row">
+            <div class="col-xs-12">
+              <div class="form-group">
+                <label for="spreadsheet">Link</label>
+                <input id="input-spreadsheet" name="spreadsheet" type="text" class="form-control" placeholder="Link a SpreadSheet" value="https://docs.google.com/spreadsheets/d/1VcEm4qSq8LcEvS7j5ik01Py43y9HED9jWyQmViWKXAI/edit#gid=0">
+                <p class="help-block">Link a la hoja de calculo de Google.</p>
+              </div>
+
+              <button id="btn-load" type="button" class="btn btn-default pull-right col-xs-2">
+                Cargar
+              </button>
+            </div>
+            <div class="col-xs-6">
+              <div class="checkbox">
+                <label >
+                  <input id="grid-check" type="checkbox" name="grid" value="">Rejilla
+                </label>
+              </div>
+            </div>
+            <div class="col-xs-12">
+              <button id="btn-export" type="button" class="btn btn-default col-xs-2 pull-right">
+                Exportar
+              </button>
+            </div>
+            <div class="col-xs-12">
+              <button id="btn-zoom-minus" type="button" class="btn btn-default col-xs-2 pull-right">
+                -
+              </button>
+              <button id="btn-zoom-plus" type="button" class="btn btn-default col-xs-2 pull-right">
+                +
+              </button>
+            </div>
+
           </div>
          </div>
       </div> <!-- end main row -->
@@ -66,6 +99,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 		<script src="js/three.min.js"></script>
+		<script src="js/OBJExporter.js"></script>
 		<script src="js/Viewer.js"></script>
 		<script src="js/example.js"></script>
   </body>

@@ -41,15 +41,15 @@ class Viewer {
     this.container.appendChild( this.renderer.domElement );
     this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.1, 1000 );
     // Set camera position
-    this.camera.position.y = 30;
-    this.camera.position.z = 40;
-    this.camera.rotation.x = -0.6;
+    this.camera.position.y = 12;
+    this.camera.position.z = 20;
+    this.camera.rotation.x = -0.4;
     // Object by which the camera ratates around
-    this.centerPivot.position.x = 10.5;
+    this.centerPivot.position.x = 0.5;
     this.centerPivot.add( this.camera )
     this.scene.add( this.centerPivot );
-    tool.createGrid();
-    tool.createOrigin();
+    this.createGrid();
+    this.createOrigin();
     render();
   }
 
@@ -57,63 +57,94 @@ class Viewer {
     this.data = data;
     // Creating meshes
     for (var i = 0; i < data.length; i++) {
-      var piece = data[i];
-      var geometry = new THREE.BoxGeometry( piece.w, piece.h, piece.l );
-      var wireframeGeometry = new THREE.EdgesGeometry( geometry );
-      var pieceMesh = new THREE.Mesh(geometry, this.materials[piece.material]);
-      var wireframe = new THREE.LineSegments( wireframeGeometry, this.materials['wireframe'] );
-
-      pieceMesh.position.x = piece.x + piece.w/2;
-      pieceMesh.position.y = piece.y + piece.h/2;
-      pieceMesh.position.z = piece.z + piece.l/2;
-
-      wireframe.position.x = piece.x + piece.w/2 ;
-      wireframe.position.y = piece.y + piece.h/2;
-      wireframe.position.z = piece.z + piece.l/2;
-      pieceMesh.tag = piece.tag;
-      pieceMesh.dataIndex = i;
-      this.scene.add(pieceMesh);
-      this.scene.add(wireframe);
-      this.meshes.push(pieceMesh);
-      this.wireframes.push(wireframe);
+      var result = this.createPiece(data[i]);
+      result.piece.dataIndex = i;
+      this.scene.add(result.piece);
+      this.scene.add(result.wireframe);
+      this.meshes.push(result.piece);
+      this.wireframes.push(result.wireframe);
     }
+  }
+
+  rotatePiece(piece, wireframe, orientation){
+    var rotation = {x:0, y:0, z:0};
+    if (orientation == 1){
+      rotation.z = Math.PI / 2;
+      rotation.x = Math.PI / 2;
+    }
+    else if (orientation == 2) {
+      piece.rotation.z = 0;
+      wireframe.rotation.z = 0;
+    }
+    else if (orientation == 3) {
+
+    }
+    piece.rotation.x = rotation.x;
+    wireframe.rotation.x = rotation.x;
+    piece.rotation.y = rotation.y;
+    wireframe.rotation.y = rotation.y;
+    piece.rotation.z = rotation.z;
+    wireframe.rotation.z = rotation.z;
+  }
+
+  correctSize(data){
+    console.log(data);
+    var position;
+    // rotate position Vector3
+    if (data.orientation == 1){
+      position = new THREE.Vector3(data.h, data.l, data.w);
+    }
+    else if (data.orientation == 2){
+      position = new THREE.Vector3(data.l, data.h, data.w);
+    }
+    else{
+      position = new THREE.Vector3(data.w, data.h, data.l);
+    }
+    //var axis = new THREE.Vector3( 1, 0, 0 );
+    //position.applyAxisAngle( axis, Math.PI / 2 );
+
+    console.log(position);
+    data.x = data.x/200;
+    data.y = data.y/200;
+    data.z = data.z/200;
+    data.w = Math.abs(position.x/200);
+    data.h = Math.abs(position.y/200);
+    data.l = Math.abs(position.z/200);
+    return data;
+  }
+  createPiece(d){
+    var data = this.correctSize(d);
+    var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
+    var wireframeGeometry = new THREE.EdgesGeometry( geometry );
+    var pieceMesh = new THREE.Mesh(geometry, this.materials[data.material]);
+    var wireframe = new THREE.LineSegments( wireframeGeometry, this.materials['wireframe'] );
+
+    pieceMesh.position.x = data.x + data.w/2;
+    pieceMesh.position.y = data.y + data.h/2;
+    pieceMesh.position.z = data.z + data.l/2;
+    //
+    wireframe.position.x = data.x + data.w/2 ;
+    wireframe.position.y = data.y + data.h/2;
+    wireframe.position.z = data.z + data.l/2;
+
+    pieceMesh.tag = data.name;
+    pieceMesh.material.color.setHex(data.color);
+
+    return {piece : pieceMesh, wireframe: wireframe};
   }
 
   updateMesh(index, data){
-    console.log("Update mesh: " + index + ", data: ", data);
-
-    this.meshes[index].scale.x = data.w / this.data[index].w;
-    this.meshes[index].scale.y = data.h / this.data[index].h;
-    this.meshes[index].scale.z = data.l / this.data[index].l;
-
-    this.meshes[index].position.x = data.x + data.w/2;
-    this.meshes[index].position.y = data.y + data.h/2;
-    this.meshes[index].position.z = data.z + data.l/2;
-
-    this.wireframes[index].scale.x = data.w / this.data[index].w;
-    this.wireframes[index].scale.y = data.h / this.data[index].h;
-    this.wireframes[index].scale.z = data.l / this.data[index].l;
-    this.wireframes[index].position.x = data.x + data.w/2;
-    this.wireframes[index].position.y = data.y + data.h/2;
-    this.wireframes[index].position.z = data.z + data.l/2;
+    this.meshes[index].parent.remove(this.meshes[index])
+    this.wireframes[index].parent.remove(this.wireframes[index])
+    var result = this.createPiece(data);
+    result.piece.dataIndex = index;
+    this.scene.add(result.piece);
+    this.scene.add(result.wireframe);
+    this.meshes[index] = result.piece;
+    this.wireframes[index] = result.wireframe;
   }
 
-  highlightPiece(event){
-    this.mouse.x = ( event.layerX / this.container.offsetWidth ) * 2 - 1;
-    this.mouse.y = - ( event.layerY / this.container.offsetHeight ) * 2 + 1;
-    this.raycaster.setFromCamera( this.mouse, this.camera );
-    // calculate objects intersecting the picking ray
-    var intersects = this.raycaster.intersectObjects( this.scene.children );
-    for (var i = 0; i < intersects.length; i++) {
-      if (intersects[i].object.tag){
-        selectedItemIndex = intersects[i].object.dataIndex;
-        this.meshes[selectedItemIndex].material.color.setHex( 0x878787 );
-        return true;
-      }
-    }
-    return false;
 
-  }
   getPiece(event){
     // calculate mouse position in normalized device coordinates
     // (-1 to +1) for both components
@@ -126,7 +157,6 @@ class Viewer {
   	var intersects = this.raycaster.intersectObjects( this.scene.children );
     for (var i = 0; i < intersects.length; i++) {
       if (intersects[i].object.tag){
-        console.log(intersects[i].object.tag);
         selectedItemIndex = intersects[i].object.dataIndex;
         return selectedItemIndex;
       }
@@ -155,7 +185,7 @@ class Viewer {
   }
 
   createOrigin(){
-    this.createLine({x:0,y:0,z:0}, {x:3,y:0,z:0});
+    this.createLine({x:0,y:0,z:0}, {x:10,y:0,z:0});
     this.createLine({x:0,y:0,z:0}, {x:0,y:3,z:0});
     this.createLine({x:0,y:0,z:0}, {x:0,y:0,z:3});
   }
@@ -165,6 +195,20 @@ class Viewer {
       this.grid[i].visible = show;
     }
   }
+
+  exportToObj(){
+    var exporter = new THREE.OBJExporter();
+		var result = exporter.parse( ViewerTool.viewer.scene );
+
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
+    element.setAttribute('download', 'export.obj');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+
 }
 
 var viewer = new Viewer();
