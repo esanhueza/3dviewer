@@ -73,10 +73,14 @@ class Viewer {
       rotation.x = Math.PI / 2;
     }
     else if (orientation == 2) {
-      piece.rotation.z = 0;
-      wireframe.rotation.z = 0;
+      rotation.z = 0;
+      rotation.z = 0;
     }
     else if (orientation == 3) {
+      rotation.z = Math.PI / 2;
+      rotation.x = Math.PI / 2;
+    }
+    else if (orientation == 4) {
 
     }
     piece.rotation.x = rotation.x;
@@ -88,7 +92,6 @@ class Viewer {
   }
 
   correctSize(data){
-    console.log(data);
     var position;
     // rotate position Vector3
     if (data.orientation == 1){
@@ -96,6 +99,12 @@ class Viewer {
     }
     else if (data.orientation == 2){
       position = new THREE.Vector3(data.l, data.h, data.w);
+    }
+    else if (data.orientation == 3){
+      position = new THREE.Vector3(data.l, data.w, data.h);
+    }
+    else if (data.orientation == 4){
+      position = new THREE.Vector3(data.w, data.l, data.h);
     }
     else{
       position = new THREE.Vector3(data.w, data.h, data.l);
