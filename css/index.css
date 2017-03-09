@@ -31,3 +31,8 @@ td {margin: 0; padding: 0;}
 .fixed-panel{
   height: 80vh;
 }
+
+.fixed-table{
+  height: 40vh;
+  overflow-y: auto;
+}

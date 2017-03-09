@@ -26,6 +26,8 @@ $('#btn-export').on('click', function(){
 });
 
 var actionInterval;
+var isMouseDown;
+var previousMousePosition;
 $('#btn-rotate-left').click(function(){
   tool.rotate.call(tool, -0.4);
 });
@@ -38,18 +40,33 @@ $('#btn-rotate-right').click(function(){
 $('#btn-zoom-in').click(function(){
   tool.zoom.call(tool, -1);
 });
-// .mousedown(function(){
-//   clearInterval(actionInterval);
-//   actionInterval = setInterval(function(){
-//     tool.zoom.call(tool, -1);
-//   }, 100);
-// }).mouseout(function(){
-//   clearInterval(actionInterval);
-// });
 
 $('#btn-zoom-out').click(function(){
   tool.zoom.call(tool, 2);
 });
+
+
+
+$(viewerSection).mousemove(function(e){
+  if (isMouseDown){
+    var deltaMove = {
+      x: e.offsetX - previousMousePosition.x,
+      y: e.offsetY - previousMousePosition.y,
+    }
+    viewer.moveCamera(deltaMove);
+  }
+
+  previousMousePosition = {
+    x: e.offsetX,
+    y: e.offsetY
+  }
+}).mousedown(function(){
+  isMouseDown = true;
+}).mouseup(function(){
+  isMouseDown = false;
+});
+
+
 
 $('#meshes-table tbody').on('change', 'tr td input, tr td select', updateMesh);
 $('#btn-load').on('click', loadData);

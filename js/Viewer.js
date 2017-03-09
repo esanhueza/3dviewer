@@ -222,6 +222,11 @@ class Viewer {
     this.camera.translateZ( value * 1 );
   }
 
+  moveCamera(d){
+    this.camera.position.x -= d.x / 100;
+    this.camera.position.y += d.y / 100;
+  }
+
 }
 
 var viewer = new Viewer();
