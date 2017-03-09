@@ -21,7 +21,36 @@ document.getElementById('grid-check').addEventListener('change', function(e){
   tool.toggleGrid(this.checked);
 })
 
-$('#btn-export').on('click', tool.exportToObj);
+$('#btn-export').on('click', function(){
+  tool.exportToObj.call(tool);
+});
+
+var actionInterval;
+$('#btn-rotate-left').click(function(){
+  tool.rotate.call(tool, -0.4);
+});
+
+
+$('#btn-rotate-right').click(function(){
+  tool.rotate.call(tool, 0.4);
+});
+
+$('#btn-zoom-in').click(function(){
+  tool.zoom.call(tool, -1);
+});
+// .mousedown(function(){
+//   clearInterval(actionInterval);
+//   actionInterval = setInterval(function(){
+//     tool.zoom.call(tool, -1);
+//   }, 100);
+// }).mouseout(function(){
+//   clearInterval(actionInterval);
+// });
+
+$('#btn-zoom-out').click(function(){
+  tool.zoom.call(tool, 2);
+});
+
 $('#meshes-table tbody').on('change', 'tr td input, tr td select', updateMesh);
 $('#btn-load').on('click', loadData);
 
@@ -50,19 +79,19 @@ function loadData(){
       var parsedData = [];
       var data = response.feed.entry;
       for (var i = 0; i < len; i++) {
-        var obj = data[i].content.$t.split(',')
+        var obj = data[i].content.$t.split(', ')
         // ignore column 1, is empty
         if (obj.length >= 9){
           parsedData.push({
             name: obj[0].split(':')[1],
-            l: parseFloat(obj[1].split(':')[1]),
-            w: parseFloat(obj[2].split(':')[1]),
-            h: parseFloat(obj[3].split(':')[1]),
+            l: parseFloat(obj[1].split(':')[1].replace(',', '.')),
+            w: parseFloat(obj[2].split(':')[1].replace(',', '.')),
+            h: parseFloat(obj[3].split(':')[1].replace(',', '.')),
             orientation: parseInt(obj[4].split(':')[1]),
             color: '0x' + obj[5].split(':')[1].replace(' ', ''),
-            y: parseFloat(obj[6].split(':')[1]),
-            x: parseFloat(obj[7].split(':')[1]),
-            z: parseFloat(obj[8].split(':')[1]),
+            y: parseFloat(obj[6].split(':')[1].replace(',', '.')),
+            x: parseFloat(obj[7].split(':')[1].replace(',', '.')),
+            z: parseFloat(obj[8].split(':')[1].replace(',', '.')),
           });
         }
         else{
@@ -100,12 +129,12 @@ function updateMeshList(data){
     console.log(i ,data[i]);
     var html = '<tr>' +
         '<td>'+(i+1)+'</td><td><input type="text" size="10" maxlength="6" value="'+data[i].name+'"></td>'+
-        '<td><input type="number" size="1" value="'+data[i].w+'"></td>' +
-        '<td><input type="number" size="1" value="'+data[i].h+'"></td>' +
-        '<td><input type="number" size="1" value="'+data[i].l+'"></td>' +
-        '<td><input type="number" size="1" value="'+data[i].x+'"></td>' +
-        '<td><input type="number" size="1" value="'+data[i].y+'"></td>' +
-        '<td><input type="number" size="1" value="'+data[i].z+'"></td>' +
+        '<td><input type="number" size="1" step="0.1" value="'+data[i].w+'"></td>' +
+        '<td><input type="number" size="1" step="0.1" value="'+data[i].h+'"></td>' +
+        '<td><input type="number" size="1" step="0.1" value="'+data[i].l+'"></td>' +
+        '<td><input type="number" size="1" step="0.1" value="'+data[i].x+'"></td>' +
+        '<td><input type="number" size="1" step="0.1" value="'+data[i].y+'"></td>' +
+        '<td><input type="number" size="1" step="0.1" value="'+data[i].z+'"></td>' +
         '<td><input type="color" name="color" value="'+data[i].color.replace('0x', '#')+'">'+
         '<td><select>' +
         '<option value="1" '+ (data[i].orientation==1 ? 'selected' : '') +'> Vertical de corte </option>' +

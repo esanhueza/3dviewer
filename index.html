@@ -33,7 +33,67 @@
           </div>
         </div>
 				<div id="toolbar" class="col-md-offset-7 col-md-5 col-xs-12">
-					<div class="panel panel-default">
+
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div class="col-xs-6">
+                <div class="checkbox">
+                  <label >
+                    <input id="grid-check" type="checkbox" name="grid" value="">Rejilla
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-xs-12">
+                <button id="btn-zoom-in" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-5">
+                  <span class="glyphicon glyphicon-zoom-in"></span>
+                </button>
+              </div>
+              <div class="col-xs-12">
+                <button id="btn-rotate-left" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-3">
+                  <span class="glyphicon glyphicon-arrow-left"></span>
+                </button>
+                <button id="btn-rotate-right" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-2">
+                  <span class="glyphicon glyphicon-arrow-right"></span>
+                </button>
+              </div>
+              <div class="col-xs-12">
+                <button id="btn-zoom-out" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-5">
+                  <span class="glyphicon glyphicon-zoom-out"></span>
+                </button>
+              </div>
+              <div class="col-xs-12">
+                <button id="btn-rotate" type="button" class="btn btn-default col-xs-2 pull-right">
+                  <span class="glyphicon glyphicon-repeat"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <br>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div class="col-xs-12">
+                <div class="form-group">
+                  <label for="spreadsheet">
+                    <span class="glyphicon glyphicon-link"></span>
+                    Link
+                  </label>
+                  <input id="input-spreadsheet" name="spreadsheet" type="text" class="form-control" placeholder="Link a SpreadSheet" value="https://docs.google.com/spreadsheets/d/1VcEm4qSq8LcEvS7j5ik01Py43y9HED9jWyQmViWKXAI/edit#gid=01">
+                  <p class="help-block">Link a la hoja de calculo de Google.</p>
+                </div>
+                <button id="btn-load" type="button" class="btn btn-default col-xs-2 pull-right">
+                  Cargar
+                </button>
+                <button id="btn-export" type="button" class="btn btn-default col-xs-2 pull-right">
+                  <span class="glyphicon glyphicon-floppy-save"></span>
+                  Exportar
+                </button>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="panel panel-default">
 					  <div class="panel-body">
                 <!-- Table -->
                 <table id="meshes-table" class="table">
@@ -56,40 +116,6 @@
                 </table>
 					  </div>
 					</div>
-          <div id="tools" class="row">
-            <div class="col-xs-12">
-              <div class="form-group">
-                <label for="spreadsheet">Link</label>
-                <input id="input-spreadsheet" name="spreadsheet" type="text" class="form-control" placeholder="Link a SpreadSheet" value="https://docs.google.com/spreadsheets/d/1VcEm4qSq8LcEvS7j5ik01Py43y9HED9jWyQmViWKXAI/edit#gid=01">
-                <p class="help-block">Link a la hoja de calculo de Google.</p>
-              </div>
-
-              <button id="btn-load" type="button" class="btn btn-default pull-right col-xs-2">
-                Cargar
-              </button>
-            </div>
-            <div class="col-xs-6">
-              <div class="checkbox">
-                <label >
-                  <input id="grid-check" type="checkbox" name="grid" value="">Rejilla
-                </label>
-              </div>
-            </div>
-            <div class="col-xs-12">
-              <button id="btn-export" type="button" class="btn btn-default col-xs-2 pull-right">
-                Exportar
-              </button>
-            </div>
-            <div class="col-xs-12">
-              <button id="btn-zoom-minus" type="button" class="btn btn-default col-xs-2 pull-right">
-                -
-              </button>
-              <button id="btn-zoom-plus" type="button" class="btn btn-default col-xs-2 pull-right">
-                +
-              </button>
-            </div>
-
-          </div>
          </div>
       </div> <!-- end main row -->
 	 </div>

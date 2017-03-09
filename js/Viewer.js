@@ -11,6 +11,7 @@ class Viewer {
     this.meshes = [];
     this.wireframes = [];
     this.centerPivot = new THREE.Object3D();
+    this.group = new THREE.Group();
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xeaa04b,
@@ -45,11 +46,10 @@ class Viewer {
     this.camera.position.z = 20;
     this.camera.rotation.x = -0.4;
     // Object by which the camera ratates around
-    this.centerPivot.position.x = 0.5;
     this.centerPivot.add( this.camera )
     this.scene.add( this.centerPivot );
+    this.scene.add( this.group );
     this.createGrid();
-    this.createOrigin();
     render();
   }
 
@@ -59,36 +59,24 @@ class Viewer {
     for (var i = 0; i < data.length; i++) {
       var result = this.createPiece(data[i]);
       result.piece.dataIndex = i;
-      this.scene.add(result.piece);
-      this.scene.add(result.wireframe);
+      //this.scene.add(result.piece);
+      //this.scene.add(result.wireframe);
       this.meshes.push(result.piece);
       this.wireframes.push(result.wireframe);
+
+      this.group.add(result.piece);
+      this.group.add(result.wireframe);
     }
+
+    this.updatePivot();
   }
 
-  rotatePiece(piece, wireframe, orientation){
-    var rotation = {x:0, y:0, z:0};
-    if (orientation == 1){
-      rotation.z = Math.PI / 2;
-      rotation.x = Math.PI / 2;
-    }
-    else if (orientation == 2) {
-      rotation.z = 0;
-      rotation.z = 0;
-    }
-    else if (orientation == 3) {
-      rotation.z = Math.PI / 2;
-      rotation.x = Math.PI / 2;
-    }
-    else if (orientation == 4) {
-
-    }
-    piece.rotation.x = rotation.x;
-    wireframe.rotation.x = rotation.x;
-    piece.rotation.y = rotation.y;
-    wireframe.rotation.y = rotation.y;
-    piece.rotation.z = rotation.z;
-    wireframe.rotation.z = rotation.z;
+  updatePivot(){
+    var box = new THREE.Box3();
+    box.setFromObject( this.group );
+    this.centerPivot.position.x = (box.max.x - box.min.x) / 2;
+    this.centerPivot.position.y = (box.max.y - box.min.y) / 2;
+    this.centerPivot.position.z = (box.max.z - box.min.z) / 2;
   }
 
   correctSize(data){
@@ -109,10 +97,7 @@ class Viewer {
     else{
       position = new THREE.Vector3(data.w, data.h, data.l);
     }
-    //var axis = new THREE.Vector3( 1, 0, 0 );
-    //position.applyAxisAngle( axis, Math.PI / 2 );
 
-    console.log(position);
     data.x = data.x/200;
     data.y = data.y/200;
     data.z = data.z/200;
@@ -147,10 +132,11 @@ class Viewer {
     this.wireframes[index].parent.remove(this.wireframes[index])
     var result = this.createPiece(data);
     result.piece.dataIndex = index;
-    this.scene.add(result.piece);
+    this.group.add(result.piece);
     this.scene.add(result.wireframe);
     this.meshes[index] = result.piece;
     this.wireframes[index] = result.wireframe;
+    this.updatePivot();
   }
 
 
@@ -205,9 +191,14 @@ class Viewer {
     }
   }
 
+  // create obj file with the meshes
   exportToObj(){
     var exporter = new THREE.OBJExporter();
-		var result = exporter.parse( ViewerTool.viewer.scene );
+    // remove wireframes and grid
+    for (var i = 0; i < this.wireframes.length; i++) {
+      this.wireframes[i].parent.remove(this.wireframes[i]);
+    }
+		var result = exporter.parse(this.group);
 
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
@@ -216,6 +207,19 @@ class Viewer {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+
+    // add wireframes and grid
+    for (var i = 0; i < this.wireframes.length; i++) {
+      this.group.add(this.wireframes[i]);
+    }
+  }
+
+  rotate(value){
+    this.centerPivot.rotation.y += value;
+  }
+
+  zoom(value){
+    this.camera.translateZ( value * 1 );
   }
 
 }
@@ -226,5 +230,5 @@ ViewerTool.viewer = viewer;
 function render(){
 	requestAnimationFrame( render );
 	viewer.renderer.render( viewer.scene, viewer.camera );
-  viewer.centerPivot.rotation.y += 0.01;
+  //viewer.centerPivot.rotation.y += 0.01;
 }
