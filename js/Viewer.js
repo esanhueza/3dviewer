@@ -6,6 +6,7 @@ class Viewer {
     this.scene.background = new THREE.Color( 0xf2f2f2 );
     this.renderer = new THREE.WebGLRenderer({
       preserveDrawingBuffer: true,
+      antialiasing: true,
     });
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
