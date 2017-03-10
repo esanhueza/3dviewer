@@ -258,6 +258,16 @@ class Viewer {
     });
     exporter.render();
   }
+
+  exportIMG(){
+    var result = document.createElement('a');
+    result.setAttribute('href',  this.renderer.domElement.toDataURL('image/jpeg'));
+    result.setAttribute('download', 'model.jpeg') ;
+    result.style.display = 'none';
+    document.body.appendChild(result);
+    result.click();
+    document.body.removeChild(result);
+  }
 }
 
 var viewer = new Viewer();

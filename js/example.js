@@ -29,6 +29,10 @@ $('#btn-export').on('click', function(){
   tool.exportToObj.call(tool);
 });
 
+$('#btn-export-img').on('click', function(){
+  tool.exportIMG.call(tool);
+});
+
 var actionInterval;
 var isMouseDown;
 var previousMousePosition;
