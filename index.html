@@ -33,15 +33,17 @@
           </div>
         </div>
 				<div id="toolbar" class="col-md-offset-7 col-md-5 col-xs-12">
-
+          <a href="" id="result"></a>
+          <img src="" id="preview" alt="">
           <div class="panel panel-default">
             <div class="panel-body">
-              <div class="col-xs-6">
-                <div class="checkbox">
-                  <label >
-                    <input id="grid-check" type="checkbox" name="grid" value="">Rejilla
-                  </label>
-                </div>
+              <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-default">
+                  <input type="checkbox" id="rotate-check" autocomplete="off"> <span class="glyphicon glyphicon-repeat"></span> Rotar
+                </label>
+                <label class="btn btn-default">
+                  <input type="checkbox" id="grid-check" autocomplete="off"> <span class="glyphicon glyphicon-th-large"></span> Rejilla
+                </label>
               </div>
 
               <div class="col-xs-12">
@@ -62,11 +64,6 @@
                   <span class="glyphicon glyphicon-zoom-out"></span>
                 </button>
               </div>
-              <div class="col-xs-12">
-                <button id="btn-rotate" type="button" class="btn btn-default col-xs-2 pull-right">
-                  <span class="glyphicon glyphicon-repeat"></span>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -83,11 +80,16 @@
                   <p class="help-block">Link a la hoja de calculo de Google.</p>
                 </div>
                 <button id="btn-load" type="button" class="btn btn-default col-xs-2 pull-right">
+                  <span class="glyphicon glyphicon-floppy-open"></span>
                   Cargar
                 </button>
                 <button id="btn-export" type="button" class="btn btn-default col-xs-2 pull-right">
                   <span class="glyphicon glyphicon-floppy-save"></span>
-                  Exportar
+                  Exportar modelo
+                </button>
+                <button id="btn-export-gif" type="button" class="btn btn-default col-xs-2 pull-right">
+                  <span class="glyphicon glyphicon-picture"></span>
+                  Exportar GIF
                 </button>
               </div>
             </div>
@@ -125,6 +127,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 		<script src="js/three.min.js"></script>
+    <script src="js/gif.js"></script>
 		<script src="js/OBJExporter.js"></script>
 		<script src="js/Viewer.js"></script>
 		<script src="js/example.js"></script>

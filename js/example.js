@@ -17,9 +17,13 @@ tool.init(viewerSection);
 //loadData();
 
 
-document.getElementById('grid-check').addEventListener('change', function(e){
-  tool.toggleGrid(this.checked);
+$('#grid-check').on('change', function (){
+    tool.toggleGrid(this.checked);
 })
+$('#rotate-check').on('change', function (){
+    tool.toggleRotation(this.checked);
+})
+
 
 $('#btn-export').on('click', function(){
   tool.exportToObj.call(tool);
@@ -70,6 +74,9 @@ $(viewerSection).mousemove(function(e){
 
 $('#meshes-table tbody').on('change', 'tr td input, tr td select', updateMesh);
 $('#btn-load').on('click', loadData);
+$('#btn-export-gif').on('click', function(){
+  tool.exportGIF.call(tool);
+});
 
 
 function loadData(){
@@ -112,8 +119,8 @@ function loadData(){
           });
         }
         else{
-          if (obj.length > 1){
-            console.log(data[i].title.$t + " is missing data.");
+          if (obj.length > 1 ){
+            //console.log('Piece ' + data[i].title.$t + ' is missing data.');
           }
         }
       }
@@ -143,7 +150,6 @@ function updateMesh(evt){
 
 function updateMeshList(data){
   for (var i = 0; i < data.length; i++) {
-    console.log(i ,data[i]);
     var html = '<tr>' +
         '<td>'+(i+1)+'</td><td><input type="text" size="10" maxlength="6" value="'+data[i].name+'"></td>'+
         '<td><input type="number" size="1" step="0.1" value="'+data[i].w+'"></td>' +

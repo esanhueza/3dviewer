@@ -4,7 +4,9 @@ class Viewer {
   constructor() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color( 0xf2f2f2 );
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      preserveDrawingBuffer: true,
+    });
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.grid = [];
@@ -12,6 +14,7 @@ class Viewer {
     this.wireframes = [];
     this.centerPivot = new THREE.Object3D();
     this.group = new THREE.Group();
+    this.autoRotate = false;
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xeaa04b,
@@ -169,6 +172,9 @@ class Viewer {
       this.grid.push(line2);
     }
   }
+  toggleRotation(rotate){
+    this.autoRotate = rotate;
+  }
 
   createLine(s, d){
     var geometry = new THREE.Geometry();
@@ -199,7 +205,6 @@ class Viewer {
       this.wireframes[i].parent.remove(this.wireframes[i]);
     }
 		var result = exporter.parse(this.group);
-
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
     element.setAttribute('download', 'export.obj');
@@ -226,7 +231,33 @@ class Viewer {
     this.camera.position.x -= d.x / 100;
     this.camera.position.y += d.y / 100;
   }
+  exportGIF(){
+    var steps = 8;
+    var exporter = new GIF({
+      workers: 2,
+      quality: 10,
+      workerScript: 'js/gif.worker.js'
+    });
+    this.centerPivot.rotation.y = 0;
+    for (var i = 0; i < steps; i++) {
+      var element = document.createElement('img');
+      this.rotate( i == 0 ? 0 : (45 * Math.PI / 180));
+    	viewer.renderer.render( this.scene, this.camera );
+      element.src = this.renderer.domElement.toDataURL('image/jpeg');
+      exporter.addFrame(element);
+    }
 
+    exporter.on('finished', function(blob) {
+      var result = document.createElement('a');
+      result.setAttribute('href', window.URL.createObjectURL(blob)) ;
+      result.setAttribute('download', 'model.gif') ;
+      result.style.display = 'none';
+      document.body.appendChild(result);
+      result.click();
+      document.body.removeChild(result);
+    });
+    exporter.render();
+  }
 }
 
 var viewer = new Viewer();
@@ -235,5 +266,7 @@ ViewerTool.viewer = viewer;
 function render(){
 	requestAnimationFrame( render );
 	viewer.renderer.render( viewer.scene, viewer.camera );
-  //viewer.centerPivot.rotation.y += 0.01;
+  if (viewer.autoRotate){
+    viewer.centerPivot.rotation.y += 0.01;
+  }
 }
