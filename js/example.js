@@ -106,7 +106,7 @@ function loadData(){
       var len = response.feed.entry.length;
       var parsedData = [];
       var data = response.feed.entry;
-      for (var i = 0; i < len; i++) {
+      for (var i = 1; i < len; i++) {
         var obj = data[i].content.$t.split(', ')
         // ignore column 1, is empty
         if (obj.length >= 9){
@@ -145,11 +145,11 @@ function updateMesh(evt){
   newData.x = parseInt($(row[5]).find('input').val());
   newData.y = parseInt($(row[6]).find('input').val());
   newData.z = parseInt($(row[7]).find('input').val());
+  newData.visible = $(row[10]).find('input').is(':checked');
   var color = $(row[8]).find('input').val();
   newData.color = '0x' + color.replace(/[ #]/g, '');
   newData.orientation = parseInt($(row[9]).find('select').val());
   tool.updateMesh(index, newData);
-
 }
 
 function updateMeshList(data){
@@ -168,7 +168,8 @@ function updateMeshList(data){
         '<option value="2" '+ (data[i].orientation==2 ? 'selected' : '') +'> Horizontal de corte </option>' +
         '<option value="3" '+ (data[i].orientation==3 ? 'selected' : '') +'> Vertical de frente </option>' +
         '<option value="4" '+ (data[i].orientation==4 ? 'selected' : '') +'> Horizontal de frente </option>' +
-        '</select>';
+        '</select></td>' +
+        '<td><input type="checkbox" name="visible" checked>';
     html += '</td></tr>';
     table.append(html);
   }

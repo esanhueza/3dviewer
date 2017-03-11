@@ -135,12 +135,15 @@ class Viewer {
     this.meshes[index].parent.remove(this.meshes[index])
     this.wireframes[index].parent.remove(this.wireframes[index])
     var result = this.createPiece(data);
+    result.piece.visible = data.visible;
+    result.wireframe.visible = data.visible;
     result.piece.dataIndex = index;
     this.group.add(result.piece);
     this.scene.add(result.wireframe);
     this.meshes[index] = result.piece;
     this.wireframes[index] = result.wireframe;
     this.updatePivot();
+
   }
 
 
