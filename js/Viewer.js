@@ -8,6 +8,7 @@ class Viewer {
       preserveDrawingBuffer: true,
       antialiasing: true,
     });
+    //this.renderer.setPixelRatio( window.devicePixelRatio );
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.grid = [];
@@ -16,6 +17,7 @@ class Viewer {
     this.centerPivot = new THREE.Object3D();
     this.group = new THREE.Group();
     this.autoRotate = false;
+    this.fixCamera = false;
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xeaa04b,
@@ -28,7 +30,7 @@ class Viewer {
       } ),
       'wireframe' : new THREE.LineBasicMaterial({
         color: 0x000000,
-        linewidth: 3
+        linewidth: 4
       }),
       'grid' : new THREE.LineBasicMaterial({
         transparent: true,
@@ -46,9 +48,9 @@ class Viewer {
     this.container.appendChild( this.renderer.domElement );
     this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.1, 1000 );
     // Set camera position
-    this.camera.position.y = 12;
-    this.camera.position.z = 20;
-    this.camera.rotation.x = -0.4;
+    this.camera.position.y = 5;
+    this.camera.position.z = 8;
+    //this.camera.rotation.x = -0.4;
     // Object by which the camera ratates around
     this.centerPivot.add( this.camera )
     this.scene.add( this.centerPivot );
@@ -202,7 +204,7 @@ class Viewer {
   }
 
   // create obj file with the meshes
-  exportToObj(){
+  exportToObj(filename){
     var exporter = new THREE.OBJExporter();
     // remove wireframes and grid
     for (var i = 0; i < this.wireframes.length; i++) {
@@ -211,7 +213,7 @@ class Viewer {
 		var result = exporter.parse(this.group);
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
-    element.setAttribute('download', 'export.obj');
+    element.setAttribute('download', filename + '.obj');
     element.style.display = 'none';
     document.body.appendChild(element);
     element.click();
@@ -232,10 +234,20 @@ class Viewer {
   }
 
   moveCamera(d){
-    this.camera.position.x -= d.x / 100;
-    this.camera.position.y += d.y / 100;
+    this.camera.translateX(-d.x / 100);
+    this.camera.translateY(d.y / 100);
   }
-  exportGIF(){
+
+  lookAtCenter(d){
+    this.camera.lookAt({x:0,y:0,z:0});
+  }
+
+  toggleFixedCamera(v){
+    this.fixCamera = v;
+  }
+
+
+  exportGIF(filename){
     var steps = 8;
     var exporter = new GIF({
       workers: 2,
@@ -254,7 +266,7 @@ class Viewer {
     exporter.on('finished', function(blob) {
       var result = document.createElement('a');
       result.setAttribute('href', window.URL.createObjectURL(blob)) ;
-      result.setAttribute('download', 'model.gif') ;
+      result.setAttribute('download', filename + '.gif') ;
       result.style.display = 'none';
       document.body.appendChild(result);
       result.click();
@@ -263,10 +275,10 @@ class Viewer {
     exporter.render();
   }
 
-  exportIMG(){
+  exportIMG(filename){
     var result = document.createElement('a');
     result.setAttribute('href',  this.renderer.domElement.toDataURL('image/jpeg'));
-    result.setAttribute('download', 'model.jpeg') ;
+    result.setAttribute('download', filename + '.jpeg') ;
     result.style.display = 'none';
     document.body.appendChild(result);
     result.click();
@@ -283,4 +295,6 @@ function render(){
   if (viewer.autoRotate){
     viewer.centerPivot.rotation.y += 0.01;
   }
+  if (viewer.fixCamera)
+    viewer.camera.lookAt({x:0,y:0,z:0});
 }

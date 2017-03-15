@@ -7,30 +7,29 @@ var selectedItemIndex;
 var items = document.getElementsByClassName("mesh-item");
 var form = document.getElementById("mesh-form");
 var table = $('#meshes-table tbody');
-
-// DATA VARS
-
+var filename;
+// Se crea el visor 3D
 var tool = ViewerTool.viewer;
 tool.init(viewerSection);
 
 
-//loadData();
-
-
+// Se conectan los eventos con las acciones de visor
 $('#grid-check').on('change', function (){
     tool.toggleGrid(this.checked);
 })
 $('#rotate-check').on('change', function (){
     tool.toggleRotation(this.checked);
 })
-
+$('#fixed-camera-check').on('change', function (){
+    tool.toggleFixedCamera(this.checked);
+})
 
 $('#btn-export').on('click', function(){
-  tool.exportToObj.call(tool);
+  tool.exportToObj.call(tool, filename);
 });
 
 $('#btn-export-img').on('click', function(){
-  tool.exportIMG.call(tool);
+  tool.exportIMG.call(tool, filename);
 });
 
 var actionInterval;
@@ -45,6 +44,10 @@ $('#btn-rotate-right').click(function(){
   tool.rotate.call(tool, 0.4);
 });
 
+$('#btn-look-at').click(function(){
+  tool.lookAtCenter.call(tool);
+});
+
 $('#btn-zoom-in').click(function(){
   tool.zoom.call(tool, -1);
 });
@@ -52,7 +55,6 @@ $('#btn-zoom-in').click(function(){
 $('#btn-zoom-out').click(function(){
   tool.zoom.call(tool, 2);
 });
-
 
 
 $(viewerSection).mousemove(function(e){
@@ -75,16 +77,17 @@ $(viewerSection).mousemove(function(e){
 });
 
 
-
 $('#meshes-table tbody').on('change', 'tr td input, tr td select', updateMesh);
 $('#btn-load').on('click', loadData);
 $('#btn-export-gif').on('click', function(){
-  tool.exportGIF.call(tool);
+  tool.exportGIF.call(tool, filename);
 });
 
 
+// carga la información desde el spreadsheet de google
 function loadData(){
   $('#alert-load').alert('close')
+  // obtiene el id desde el link
   var link = $('#input-spreadsheet').val();
   var match = new RegExp("d\/(.*)\/").exec(link);
   if (!match){
@@ -100,12 +103,16 @@ function loadData(){
   var url = "https://spreadsheets.google.com/feeds/list/" +
             match[1] +
             "/od6/public/basic?alt=json";
+  // se solicita la informacion
   $.get({
     url: url,
     success: function(response) {
       var len = response.feed.entry.length;
       var parsedData = [];
       var data = response.feed.entry;
+      filename = data[0].content.$t.split(', ')[6].split(':')[0] + ' ' +
+                     data[0].content.$t.split(', ')[7].split(':')[0] + ':' +
+                     data[0].content.$t.split(', ')[8].split(':')[0];
       for (var i = 1; i < len; i++) {
         var obj = data[i].content.$t.split(', ')
         // ignore column 1, is empty
@@ -128,6 +135,7 @@ function loadData(){
           }
         }
       }
+      // se actualiza la informacion en el visor y en la tabla de piezas
       updateMeshList(parsedData);
       tool.createPieces(parsedData);
     }
