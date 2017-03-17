@@ -30,7 +30,7 @@ class Viewer {
       } ),
       'wireframe' : new THREE.LineBasicMaterial({
         color: 0x000000,
-        linewidth: 4
+        linewidth: 4,
       }),
       'grid' : new THREE.LineBasicMaterial({
         transparent: true,
@@ -48,8 +48,8 @@ class Viewer {
     this.container.appendChild( this.renderer.domElement );
     this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.1, 1000 );
     // Set camera position
-    this.camera.position.y = 5;
-    this.camera.position.z = 8;
+    this.camera.position.y = 10;
+    this.camera.position.z = 12;
     //this.camera.rotation.x = -0.4;
     // Object by which the camera ratates around
     this.centerPivot.add( this.camera )
@@ -146,6 +146,10 @@ class Viewer {
     this.wireframes[index] = result.wireframe;
     this.updatePivot();
 
+  }
+
+  setLineWidth(v){
+    this.materials['wireframe'].linewidth = v;
   }
 
 

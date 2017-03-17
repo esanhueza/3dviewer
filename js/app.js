@@ -24,6 +24,11 @@ $('#fixed-camera-check').on('change', function (){
     tool.toggleFixedCamera(this.checked);
 })
 
+$('#line-width-range').on('change', function (){
+    tool.setLineWidth(this.value);
+    console.log(this.value);
+})
+
 $('#btn-export').on('click', function(){
   tool.exportToObj.call(tool, filename);
 });
