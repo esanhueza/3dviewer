@@ -26,6 +26,10 @@ $('#fixed-camera-check').on('change', function (){
     tool.toggleFixedCamera(this.checked);
 });
 
+$('#meshes-visibility-check').on('change', function (){
+    tool.togglePiecesVisibility(!this.checked);
+});
+
 $('#edge-color').on('change', function (){
     tool.setEdgeColor(this.value.replace('#','0x'));
 });

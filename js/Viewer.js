@@ -239,6 +239,12 @@ class Viewer {
     this.centerPivot.rotation.y += value;
   }
 
+  togglePiecesVisibility(v){
+    for (var i = 0; i < this.meshes.length; i++) {
+      this.meshes[i].visible = v;
+    }
+  }
+
   zoom(value){
     this.camera.translateZ( value * 1 );
   }
