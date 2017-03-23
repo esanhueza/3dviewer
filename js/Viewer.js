@@ -30,7 +30,7 @@ class Viewer {
       } ),
       'wireframe' : new THREE.LineBasicMaterial({
         color: 0x000000,
-        linewidth: 4,
+        linewidth: 3,
       }),
       'grid' : new THREE.LineBasicMaterial({
         transparent: true,
@@ -115,14 +115,17 @@ class Viewer {
   createPiece(d){
     var data = this.correctSize(d);
     var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
-    var wireframeGeometry = new THREE.EdgesGeometry( geometry );
+    // var wireframeGeometry = new THREE.EdgesGeometry( geometry );
     var pieceMesh = new THREE.Mesh(geometry, this.materials[data.material]);
-    var wireframe = new THREE.LineSegments( wireframeGeometry, this.materials['wireframe'] );
+    var edges = new THREE.EdgesGeometry( geometry );
+    var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
+
+    //var wireframe = new THREE.LineSegments( wireframeGeometry, this.materials['wireframe'] );
 
     pieceMesh.position.x = data.x + data.w/2;
     pieceMesh.position.y = data.y + data.h/2;
     pieceMesh.position.z = data.z + data.l/2;
-    //
+
     wireframe.position.x = data.x + data.w/2 ;
     wireframe.position.y = data.y + data.h/2;
     wireframe.position.z = data.z + data.l/2;
@@ -149,7 +152,10 @@ class Viewer {
   }
 
   setLineWidth(v){
-    this.materials['wireframe'].linewidth = v;
+  }
+
+  setEdgeColor(v){
+    this.materials['wireframe'].color.setHex(v);
   }
 
 

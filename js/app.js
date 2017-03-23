@@ -16,18 +16,19 @@ tool.init(viewerSection);
 // Se conectan los eventos con las acciones de visor
 $('#grid-check').on('change', function (){
     tool.toggleGrid(this.checked);
-})
+});
+
 $('#rotate-check').on('change', function (){
     tool.toggleRotation(this.checked);
-})
+});
+
 $('#fixed-camera-check').on('change', function (){
     tool.toggleFixedCamera(this.checked);
-})
+});
 
-$('#line-width-range').on('change', function (){
-    tool.setLineWidth(this.value);
-    console.log(this.value);
-})
+$('#edge-color').on('change', function (){
+    tool.setEdgeColor(this.value.replace('#','0x'));
+});
 
 $('#btn-export').on('click', function(){
   tool.exportToObj.call(tool, filename);
