@@ -18,6 +18,7 @@ class Viewer {
     this.group = new THREE.Group();
     this.autoRotate = false;
     this.fixCamera = false;
+    this.pieceScale = 0.98;
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xeaa04b,
@@ -125,6 +126,7 @@ class Viewer {
     pieceMesh.position.x = data.x + data.w/2;
     pieceMesh.position.y = data.y + data.h/2;
     pieceMesh.position.z = data.z + data.l/2;
+    pieceMesh.scale.set(this.pieceScale,this.pieceScale,this.pieceScale);
 
     wireframe.position.x = data.x + data.w/2 ;
     wireframe.position.y = data.y + data.h/2;
@@ -148,10 +150,17 @@ class Viewer {
     this.meshes[index] = result.piece;
     this.wireframes[index] = result.wireframe;
     this.updatePivot();
-
   }
 
   setLineWidth(v){
+  }
+
+  setPieceScale(v){
+    this.pieceScale = v;
+    for (var i = 0; i < this.meshes.length; i++) {
+      this.meshes[i].scale.set(this.pieceScale,this.pieceScale,this.pieceScale);
+      console.log(this.pieceScale);
+    }
   }
 
   setEdgeColor(v){

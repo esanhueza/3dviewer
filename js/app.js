@@ -17,6 +17,10 @@ tool.init(viewerSection);
 $('#grid-check').on('change', function (){
     tool.toggleGrid(this.checked);
 });
+$('#piece-scale').on('change', function (){
+    tool.setPieceScale(this.value);
+    console.log(this.value);
+});
 
 $('#rotate-check').on('change', function (){
     tool.toggleRotation(this.checked);
