@@ -21,133 +21,217 @@
   <body>
 
 
-    <div class="container-fluid">
+    <div class="container">
     <br>
-    <div class="row">
-      <div class="col-xs-12">
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <div class="col-md-6 col-xs-12" >
-                <div class="form-group">
-                  <label for="spreadsheet">
-                    <span class="glyphicon glyphicon-link"></span>
-                    Link
-                  </label>
-                  <input id="input-spreadsheet" name="spreadsheet" type="text" class="form-control" placeholder="Link a SpreadSheet" value="https://docs.google.com/spreadsheets/d/1Io9jL33nJIm5jZVzr5UtQTqny-1IRmnOLO2XK-ZOSjE/edit#gid=0">
-                  <p class="help-block">Link a la hoja de calculo de Google.</p>
-                </div>
-                <div class="pull-right">
-                  <button id="btn-load" type="button" class="btn btn-default  pull-right">
-                    <span class="glyphicon glyphicon-floppy-open"></span>
-                    Cargar
-                  </button>
-                  <button id="btn-export" type="button" class="btn btn-default  pull-right">
-                    <span class="glyphicon glyphicon-floppy-save"></span>
-                    Exportar modelo
-                  </button>
-                  <button id="btn-export-gif" type="button" class="btn btn-default  pull-right">
-                    <span class="glyphicon glyphicon-facetime-video"></span>
-                    Exportar GIF
-                  </button>
-                  <button id="btn-export-img" type="button" class="btn btn-default  pull-right">
-                    <span class="glyphicon glyphicon-picture"></span>
-                    Exportar IMG
-                  </button>
-                </div>
-              </div>
 
-              <div class="col-md-6 col-xs-12">
-                <div class="col-md-6 col-xs-12">
-                  <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-default">
-                      <input type="checkbox" id="rotate-check" autocomplete="off"> <span class="glyphicon glyphicon-repeat"></span> Rotar
-                    </label>
-                    <label class="btn btn-default">
-                      <input type="checkbox" id="grid-check" autocomplete="off"> <span class="glyphicon glyphicon-th-large"></span> Rejilla
-                    </label>
-                    <label class="btn btn-default">
-                      <input type="checkbox" id="fixed-camera-check" autocomplete="off"> <span class="glyphicon glyphicon-camera"></span> Centrar
-                    </label>
-                    <label class="btn btn-default">
-                      <input type="checkbox" id="meshes-visibility-check" autocomplete="off"> <span class="glyphicon glyphicon-eye-close"></span> Ocultar piezas
-                    </label>
+    <div class="row">
+      <div class="col-xs-12 col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+              <li role="presentation" class="active"><a href="#models" aria-controls="home" role="tab" data-toggle="tab">Modelos</a></li>
+              <li role="presentation"><a href="#preferences" aria-controls="profile" role="tab" data-toggle="tab">Configuracion</a></li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane active" id="models">
+                <br>
+                <div class="col-xs-12" >
+                  <div class="input-group">
+                    <select id="model-spreadsheet" name="spreadsheet" type="text" class="form-control"></select>
+                      <span class="input-group-btn">
+                        <button id="btn-load" type="button" class="btn btn-default  pull-right">
+                          <span class="glyphicon glyphicon-refresh"></span>
+                        </button>
+                      </span>
+                  </div><!-- /input-group -->
+                  <br>
+                  <div class="pull-right">
+                    <!-- Load Button -->
+                    <div class="btn-group btn-group">
+                      <button id="btn-load-all" type="button" class="btn btn-default" name="button">Cargar todos</button>
+                    </div>
+                    <!-- Export Button -->
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Exportar <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a href="#" id="btn-export">
+                            <span class="glyphicon glyphicon-floppy-save"></span>
+                            Exportar modelo
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#" id="btn-export-gif">
+                            <span class="glyphicon glyphicon-facetime-video"></span>
+                            Exportar GIF
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#" id="btn-export-img">
+                            <span class="glyphicon glyphicon-picture"></span>
+                            Exportar IMG
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
-                <div class="col-xs-6">
-                  <div class="btn-group pull-right">
-                    <input type="color" id="edge-color" name="color" value="#ffffff"> Color de borde
+
+              </div>
+              <div role="tabpanel" class="tab-pane" id="preferences">
+                <br>
+                <div class="col-xs-12" >
+                  <div class="form-group">
+                    <label for="spreadsheet">
+                      <span class="glyphicon glyphicon-link"></span>
+                      Links
+                    </label>
+                    <input id="input-list-spreadsheet" name="spreadsheet" type="text" class="form-control" placeholder="Link a a listado de modelos" value="https://docs.google.com/spreadsheets/d/1Io9jL33nJIm5jZVzr5UtQTqny-1IRmnOLO2XK-ZOSjE/edit#gid=0">
+                    <p class="help-block">Link a listado de modelos.</p>
                   </div>
-                  <div class="btn-group pull-right">
-                    <input type="range" id="piece-scale" name="scale" step="0.01" max="1" min="0.9" value="0.98"> Test
-                  </div>
-                </div>
-                <div class="col-xs-12">
-                  <button id="btn-zoom-in" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-5">
-                    <span class="glyphicon glyphicon-zoom-in"></span>
-                  </button>
-                </div>
-                <div class="col-xs-12">
-                  <button id="btn-rotate-left" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-3">
-                    <span class="glyphicon glyphicon-arrow-left"></span>
-                  </button>
-                  <button id="btn-look-at" type="button" class="btn btn-default btn-lg col-xs-2">
-                    <span class="glyphicon glyphicon-camera"></span>
-                  </button>
-                  <button id="btn-rotate-right" type="button" class="btn btn-default btn-lg col-xs-2 ">
-                    <span class="glyphicon glyphicon-arrow-right"></span>
-                  </button>
-                </div>
-                <div class="col-xs-12">
-                  <button id="btn-zoom-out" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-5">
-                    <span class="glyphicon glyphicon-zoom-out"></span>
-                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-			<div class="row">
+      <div class="col-md-6 col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="btn-group-vertical" data-toggle="buttons">
+              <label class="btn btn-default">
+                <input type="checkbox" id="rotate-check" autocomplete="off"> <span class="glyphicon glyphicon-repeat"></span> Rotar
+              </label>
+              <label class="btn btn-default">
+                <input type="checkbox" id="grid-check" autocomplete="off"> <span class="glyphicon glyphicon-th-large"></span> Rejilla
+              </label>
+              <label class="btn btn-default">
+                <input type="checkbox" id="fixed-camera-check" autocomplete="off"> <span class="glyphicon glyphicon-camera"></span> Centrar
+              </label>
+              <label class="btn btn-default">
+                <input type="checkbox" id="meshes-visibility-check" autocomplete="off"> <span class="glyphicon glyphicon-eye-close"></span> Ocultar piezas
+              </label>
+            </div>
+            <div class="btn-group pull-right">
+                <input type="color" id="edge-color" name="color" value="#ffffff"> Color de borde
+            </div>
+              <!--div class="btn-group pull-right">
+                <input type="range" id="piece-scale" name="scale" step="0.01" max="1" min="0.9" value="0.98"> Test
+              </div-->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="row">
         <div class="col-xs-12 col-md-12">
           <div class="panel panel-default">
             <div class="panel-body fixed-panel">
               <div id="viewer">
+                <menu id="viewer-tools" class="pull-right">
+                  <div class="col-xs-12">
+                    <button id="btn-zoom-in" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-7">
+                      <span class="glyphicon glyphicon-zoom-in"></span>
+                    </button>
+                  </div>
+                  <div class="col-xs-12">
+                    <button id="btn-rotate-left" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-5">
+                      <span class="glyphicon glyphicon-arrow-left"></span>
+                    </button>
+                    <button id="btn-look-at" type="button" class="btn btn-default btn-lg col-xs-2">
+                      <span class="glyphicon glyphicon-camera"></span>
+                    </button>
+                    <button id="btn-rotate-right" type="button" class="btn btn-default btn-lg col-xs-2 ">
+                      <span class="glyphicon glyphicon-arrow-right"></span>
+                    </button>
+                  </div>
+                  <div class="col-xs-12">
+                    <button id="btn-zoom-out" type="button" class="btn btn-default btn-lg col-xs-2 col-xs-offset-7">
+                      <span class="glyphicon glyphicon-zoom-out"></span>
+                    </button>
+                  </div>
+                </menu>
               </div>
             </div>
           </div>
         </div>
-      </div>
       <br>
-			<div class="row">
         <div class="col-xs-12">
+          <div class="panel panel-default">
+  				  <div class="panel-body fixed-table">
 
-        <div class="panel panel-default">
-				  <div class="panel-body fixed-table">
-              <!-- Table -->
-              <table id="meshes-table" class="table">
-                <thead>
-                  <tr>
-                    <th class="col-md-1">#</th>
-                    <th class="col-md-1">TAG</th>
-                    <th class="col-md-1">Ancho</th>
-                    <th class="col-md-1">Espesor</th>
-                    <th class="col-md-1">Largo</th>
-                    <th class="col-md-1">X</th>
-                    <th class="col-md-1">Y</th>
-                    <th class="col-md-1">Z</th>
-                    <th class="col-md-1">Color</th>
-                    <th class="col-md-1">Orientación</th>
-                    <th class="col-md-1">Visible</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-			      </div>
-			    </div>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                  <li role="presentation" class="active"><a href="#piecesTab" aria-controls="piecesTab" role="tab" data-toggle="tab">Piezas</a></li>
+                  <li role="presentation"><a href="#modelsTab" aria-controls="modelsTab" role="tab" data-toggle="tab">Modelos</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                  <div role="tabpanel" class="tab-pane active" id="piecesTab">
+                    <br>
+                    <!-- Nav tabs -->
+                    <ul id="nav-models" class="nav nav-tabs" role="tablist">
+
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div id="tab-content-models" class="tab-content">
+
+                    </div>
+
+
+                  </div>
+                  <div role="tabpanel" class="tab-pane" id="modelsTab">
+                    <table id="models-table" class="table">
+                      <thead>
+                        <tr>
+                          <th class="col-md-2">TAG</th>
+                          <th class="col-md-1">X</th>
+                          <th class="col-md-1">Y</th>
+                          <th class="col-md-1">Z</th>
+                          <th class="col-md-3">Orientación</th>
+                          <th class="col-md-3">Visible</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+  			      </div>
+  			    </div>
         </div>
-      </div>
 	 </div>
+
+   <!-- Table -->
+   <table id="pieces-table" class="table pieces-table" style="display: none">
+     <thead>
+       <tr>
+         <th class="col-md-1">#</th>
+         <th class="col-md-1">TAG</th>
+         <th class="col-md-1">Ancho</th>
+         <th class="col-md-1">Espesor</th>
+         <th class="col-md-1">Largo</th>
+         <th class="col-md-1">X</th>
+         <th class="col-md-1">Y</th>
+         <th class="col-md-1">Z</th>
+         <th class="col-md-1">Color</th>
+         <th class="col-md-1">Orientación</th>
+         <th class="col-md-1">Visible</th>
+       </tr>
+     </thead>
+     <tbody>
+     </tbody>
+   </table>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

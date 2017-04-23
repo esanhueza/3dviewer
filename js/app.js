@@ -1,3 +1,35 @@
+// PARAMETERS
+var QueryString = function () {
+  // This function is anonymous, is executed immediately and
+  // the return value is assigned to QueryString!
+  var query_string = {};
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+        // If first entry with this name
+    if (typeof query_string[pair[0]] === "undefined") {
+      query_string[pair[0]] = decodeURIComponent(pair[1]);
+        // If second entry with this name
+    } else if (typeof query_string[pair[0]] === "string") {
+      var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+      query_string[pair[0]] = arr;
+        // If third or later entry with this name
+    } else {
+      query_string[pair[0]].push(decodeURIComponent(pair[1]));
+    }
+  }
+  return query_string;
+}();
+
+var guidList = ['0', '1910055136', '154954464', '1125931379', '294339559', '376909587', '510015938', '991779988', '1192071857', '305467974'];
+
+var link = $('#input-list-spreadsheet').val();
+var match = new RegExp("d\/(.*)\/").exec(link);
+var urlQuery = "https://spreadsheets.google.com/feeds/list/" + match[1] + "/od6/public/full?alt=json&guid="
+var currentGuid;
+
+
 // TOOLS VARS
 var viewerSection = document.getElementById('viewer');
 var materials = {};
@@ -6,7 +38,8 @@ var materials = {};
 var selectedItemIndex;
 var items = document.getElementsByClassName("mesh-item");
 var form = document.getElementById("mesh-form");
-var table = $('#meshes-table tbody');
+var table = $('#pieces-table');
+var modelsTable = $('#models-table');
 var filename;
 // Se crea el visor 3D
 var tool = ViewerTool.viewer;
@@ -24,6 +57,14 @@ $('#piece-scale').on('change', function (){
 
 $('#rotate-check').on('change', function (){
     tool.toggleRotation(this.checked);
+});
+$('#model-spreadsheet').on('change', function (){
+  loadModel(this.value);
+});
+$('#btn-load-all').on('click', function (){
+  for (var i = 0; i < guidList.length; i++) {
+    loadModel(guidList[i]);
+  }
 });
 
 $('#fixed-camera-check').on('change', function (){
@@ -91,35 +132,76 @@ $(viewerSection).mousemove(function(e){
 });
 
 
-$('#meshes-table tbody').on('change', 'tr td input, tr td select', updateMesh);
-$('#btn-load').on('click', loadData);
+$('#tab-content-models').on('change', '.tab-pane tbody tr td input, .tab-pane tbody tr td select', updatePiece);
+$('#models-table tbody').on('change', 'tr td input, tr td select', updateModel);
+
+$('#btn-load').on('click', function(){
+  loadModel($("#model-spreadsheet")[0].value)
+});
 $('#btn-export-gif').on('click', function(){
   tool.exportGIF.call(tool, filename);
 });
 
 
-// carga la información desde el spreadsheet de google
-function loadData(){
-  $('#alert-load').alert('close')
-  // obtiene el id desde el link
-  var link = $('#input-spreadsheet').val();
-  var match = new RegExp("d\/(.*)\/").exec(link);
-  if (!match){
-    $(this).before(
-      '<div id="alert-load" class="alert alert-danger fade in" role="alert">'+
-      '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' +
-      '<h4>Error al cargar los datos!</h4>' +
-      '<p>Compruebe que el link ingresado es correcto.</p>'+
-      '<p>Recuerde que debe ser publicado a la web (Archivo -> Publicar a la Web).</p>'+
-    '</div>')
-    return false;
+loadList();
+loadGuids();
+
+function loadGuids(){
+  for (var i = 1; i <= guidList.length; i++) {
+    var select = $('#model-spreadsheet');
+    select.append('<option value='+guidList[i-1]+'>MOD'+(i) +'</option>')
+
   }
-  var url = "https://spreadsheets.google.com/feeds/list/" +
-            match[1] +
-            "/od6/public/basic?alt=json";
-  // se solicita la informacion
+
+
+}
+
+function loadList(){
+  var select = $('#link-model-spreadsheet');
+  // if (!match){
+  //   $(this).before(
+  //     '<div id="alert-load" class="alert alert-danger fade in" role="alert">'+
+  //     '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>' +
+  //     '<h4>Error al cargar los datos!</h4>' +
+  //     '<p>Compruebe que el link ingresado es correcto.</p>'+
+  //     '<p>Recuerda que debe ser publicado a la web (Archivo -> Publicar a la Web).</p>'+
+  //     '</div>')
+  //   return false;
+  // }
+
+  if (QueryString.model != undefined){
+    if (parseInt(QueryString.model) > guidList.length){
+      console.log("Modelo seleccionado no valido.");
+      return
+    }
+
+    console.log("Cargando modelo.");
+    currentGuid = guidList[QueryString.model-1];
+    loadModel(currentGuid);
+  }
+
+
+}
+
+// carga la información desde una hoja especifica (guid) del spreadsheet
+function loadModel(guid){
+  console.log(modelsTable.children().length);
+  var rows = modelsTable.find('tbody').children();
+  for (var i = 0; i < rows.length; i++) {
+    var e = $(rows[i]);
+    if (e.attr("data-guid") == guid){
+      var tag = "MOD" + (guidList.indexOf(guid)+1);
+      tool.removeModel({tag: tag});
+      e.remove();
+      $('#'+tag+'Tab').remove();
+      $('#nav-'+tag).remove();
+      break
+    }
+
+  }
+
   $.get({
-    url: url,
+    url: urlQuery + guid,
     success: function(response) {
       var len = response.feed.entry.length;
       var parsedData = [];
@@ -150,13 +232,48 @@ function loadData(){
         }
       }
       // se actualiza la informacion en el visor y en la tabla de piezas
-      updateMeshList(parsedData);
-      tool.createPieces(parsedData);
+
+      var model = {guid:guid, tag: "MOD" + (guidList.indexOf(guid)+1), x:0, y:0, z:0, orientation:1,visible:true};
+
+      addPiecesList(parsedData, model.tag);
+      tool.addModel({tag: model.tag, pieces:parsedData});
+      addModel(model);
     }
   });
 }
 
-function updateMesh(evt){
+// Agrega un modelo a la tabla de modelos
+function addModel(model){
+  var html = '<tr data-guid="'+model.guid+'">' +
+      '<td>'+model.tag+'</td>'+
+      '<td><input type="number" size="1" step="0.1" value="'+model.x+'"></td>' +
+      '<td><input type="number" size="1" step="0.1" value="'+model.y+'"></td>' +
+      '<td><input type="number" size="1" step="0.1" value="'+model.z+'"></td>' +
+      '<td><select>' +
+      '<option value="1" '+ (model.orientation==1 ? 'selected' : '') +'> Vertical de corte </option>' +
+      '<option value="2" '+ (model.orientation==2 ? 'selected' : '') +'> Horizontal de corte </option>' +
+      '<option value="3" '+ (model.orientation==3 ? 'selected' : '') +'> Vertical de frente </option>' +
+      '<option value="4" '+ (model.orientation==4 ? 'selected' : '') +'> Horizontal de frente </option>' +
+      '</select></td>' +
+      '<td><input type="checkbox" name="visible" checked>';
+  html += '</td></tr>';
+  modelsTable.append(html);
+}
+
+// actualiza los atributos del modelo en el visor con los datos obtenidos de la tabla
+function updateModel(evt){
+  var row = $(evt.target.parentElement.parentElement).children();
+  newData = {};
+  newData.tag = $(row[0]).html();
+  newData.x = parseInt($(row[1]).find('input').val());
+  newData.y = parseInt($(row[2]).find('input').val());
+  newData.z = parseInt($(row[3]).find('input').val());
+  newData.orientation = parseInt($(row[4]).find('select').val());
+  newData.visible = $(row[5]).find('input').is(':checked');
+  tool.updateModel(newData);
+}
+
+function updatePiece(evt){
   var row = $(evt.target.parentElement.parentElement).children();
   newData = {};
   index = $(row[0]).html() - 1;
@@ -171,10 +288,15 @@ function updateMesh(evt){
   var color = $(row[8]).find('input').val();
   newData.color = '0x' + color.replace(/[ #]/g, '');
   newData.orientation = parseInt($(row[9]).find('select').val());
-  tool.updateMesh(index, newData);
+  var table = evt.target.parentElement.parentElement.parentElement.parentElement;
+  var tag = $(table).attr('id').split('-')[2];
+  tool.updatePiece(tag, index, newData);
 }
 
-function updateMeshList(data){
+function addPiecesList(data, tag){
+  $('#nav-models').append('<li id="nav-'+tag+'"role="presentation"><a href="#'+tag+'Tab" aria-controls="'+tag+'Tab" role="tab" data-toggle="tab">'+tag+'</a></li>')
+  $('#tab-content-models').append('<div role="tabpanel" class="tab-pane" id="'+tag+'Tab"></div>')
+  var newTable = table.clone();
   for (var i = 0; i < data.length; i++) {
     var html = '<tr>' +
         '<td>'+(i+1)+'</td><td><input type="text" size="10" maxlength="6" value="'+data[i].name+'"></td>'+
@@ -193,6 +315,9 @@ function updateMeshList(data){
         '</select></td>' +
         '<td><input type="checkbox" name="visible" checked>';
     html += '</td></tr>';
-    table.append(html);
+    $('#'+tag+'Tab').append(newTable);
+    newTable.find("tbody").append(html);
+    newTable.attr('id', 'pieces-table-' + tag);
+    newTable.show();
   }
 }

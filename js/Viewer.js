@@ -14,6 +14,7 @@ class Viewer {
     this.grid = [];
     this.meshes = [];
     this.wireframes = [];
+    this.models = [];
     this.centerPivot = new THREE.Object3D();
     this.group = new THREE.Group();
     this.autoRotate = false;
@@ -60,22 +61,59 @@ class Viewer {
     render();
   }
 
-  createPieces(data){
+  createModels(data){
+    this.scene.remove(this.group);
+    this.group = new THREE.Group();
+    this.scene.add( this.group );
     this.data = data;
-    // Creating meshes
     for (var i = 0; i < data.length; i++) {
-      var result = this.createPiece(data[i]);
+      var model = this.createModel(data[i]);
+      this.group.add(model);
+    }
+    this.updatePivot();
+  }
+
+  findModelByTag(tag){
+    for (var i = 0; i < this.group.children.length; i++) {
+      console.log(this.group.children[i].tag, tag, this.group.children[i].tag ==tag);
+      if (this.group.children[i].tag == tag) {
+        return this.group.children[i];
+      }
+    }
+    return false;
+
+  }
+  removeModel(data){
+    var model = this.findModelByTag(data.tag);
+    if (model){
+      this.group.remove(model);
+    }
+    this.updatePivot();
+  }
+  addModel(data){
+    var model = this.createModel(data);
+    this.group.add(model);
+    this.updatePivot();
+  }
+
+  createModel(data){
+    var group = new THREE.Group();
+    group.tag = data.tag;
+    console.log("model created with tag: ", group.tag);
+    // Creating meshes
+    for (var i = 0; i < data.pieces.length; i++) {
+      var result = this.createPiece(data.pieces[i]);
       result.piece.dataIndex = i;
-      //this.scene.add(result.piece);
-      //this.scene.add(result.wireframe);
+      result.wireframe.dataIndex = i;
+
       this.meshes.push(result.piece);
       this.wireframes.push(result.wireframe);
 
-      this.group.add(result.piece);
-      this.group.add(result.wireframe);
-    }
+      group.add(result.piece);
+      group.add(result.wireframe);
+    };
 
-    this.updatePivot();
+    return group;
   }
 
   updatePivot(){
@@ -138,18 +176,44 @@ class Viewer {
     return {piece : pieceMesh, wireframe: wireframe};
   }
 
-  updateMesh(index, data){
-    this.meshes[index].parent.remove(this.meshes[index])
-    this.wireframes[index].parent.remove(this.wireframes[index])
+  updatePiece(tag, index, data){
+    //this.meshes[index].parent.remove(this.meshes[index])
+    //this.wireframes[index].parent.remove(this.wireframes[index])
     var result = this.createPiece(data);
-    result.piece.visible = data.visible;
+    var model = this.findModelByTag(tag);
+
+    for (var i = 0; i < model.children.length; i++) {
+      if (model.children[i].dataIndex == index){
+        model.remove(model.children[i]);
+      }
+    }
+    //result.piece.visible = data.visible;
     result.wireframe.visible = data.visible;
     result.piece.dataIndex = index;
-    this.group.add(result.piece);
-    this.scene.add(result.wireframe);
-    this.meshes[index] = result.piece;
-    this.wireframes[index] = result.wireframe;
+    //this.group.add(result.piece);
+    //this.scene.add(result.wireframe);
+    //this.meshes[index] = result.piece;
+    //this.wireframes[index] = result.wireframe;
+
+    model.add(result.piece);
+    model.add(result.wireframe);
     this.updatePivot();
+  }
+
+  updateModel(data){
+    var model;
+    for (var i = 0; i < this.group.children.length; i++) {
+      if (this.group.children[i].tag == data.tag)
+        model = this.group.children[i]
+    }
+    if (model == undefined)
+      return
+
+    model.position.x = data.x;
+    model.position.y = data.y;
+    model.position.z = data.z;
+    model.visible = data.visible;
+
   }
 
   setLineWidth(v){

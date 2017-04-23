@@ -36,3 +36,9 @@ td {margin: 0; padding: 0;}
   height: 40vh;
   overflow-y: auto;
 }
+
+#viewer-tools{
+  position: absolute;
+  right: 0;
+  opacity: 0.8;
+}
