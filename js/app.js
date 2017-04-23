@@ -22,11 +22,20 @@ var QueryString = function () {
   return query_string;
 }();
 
-var guidList = ['0', '1910055136', '154954464', '1125931379', '294339559', '376909587', '510015938', '991779988', '1192071857', '305467974'];
+var guidList = ['1Io9jL33nJIm5jZVzr5UtQTqny-1IRmnOLO2XK-ZOSjE',
+                '1MIhfTaNwC2Ke9yaPg9Ptow9cp7FnuQcc24rC8271HDo',
+                '1CSBpyEWJ2-9nrB_a6cLML2oj8r9qDN1lxNNdFNu0uPY',
+                '1JPuNPxzzhro2b_xXLNkeLI-5Il8h0fNKbjpBMnSST68',
+                '1W_Wf_Az9_uCMesv2fxr3xWhBHRUPwVcAqcgSkabM7-8',
+                '1anzJdB2JDuTiIq5YXPuz6dygNcTcLe4Z6iHYy0sKmT8',
+                '1yl8vGarnbzhXMBk_5vF7E2rZlQtw70E5WWec09x_5Pg',
+                '1VWGHCpsyJ-oMFnDxJnpp64BB5QBkix_ehJNFMD3u1H4',
+                '1G_dq8XNSpLsK5LgQAEfOLtvHuf4NpNU2LobW0JH6vLg',
+                '1omGhESDYyaz4cnay8W9Azk3brT6iePER9eCDuufZ48A'];
 
 var link = $('#input-list-spreadsheet').val();
 var match = new RegExp("d\/(.*)\/").exec(link);
-var urlQuery = "https://spreadsheets.google.com/feeds/list/" + match[1] + "/od6/public/full?alt=json&guid="
+
 var currentGuid;
 
 
@@ -58,9 +67,9 @@ $('#piece-scale').on('change', function (){
 $('#rotate-check').on('change', function (){
     tool.toggleRotation(this.checked);
 });
-$('#model-spreadsheet').on('change', function (){
-  loadModel(this.value);
-});
+// $('#model-spreadsheet').on('change', function (){
+//   loadModel(this.value);
+// });
 $('#btn-load-all').on('click', function (){
   for (var i = 0; i < guidList.length; i++) {
     loadModel(guidList[i]);
@@ -134,6 +143,14 @@ $(viewerSection).mousemove(function(e){
 
 $('#tab-content-models').on('change', '.tab-pane tbody tr td input, .tab-pane tbody tr td select', updatePiece);
 $('#models-table tbody').on('change', 'tr td input, tr td select', updateModel);
+$('#models-table tbody').on('click', '.btn-remove-model', function(){
+  var row = $(this).parentsUntil('tbody');
+  var guid = row[row.length-1].attr('data-guid')
+  console.log(guid);
+});
+$('#models-table tbody').on('click', '.btn-edit-model', function(){
+  console.log("btn-edit-model");
+});
 
 $('#btn-load').on('click', function(){
   loadModel($("#model-spreadsheet")[0].value)
@@ -185,7 +202,7 @@ function loadList(){
 
 // carga la información desde una hoja especifica (guid) del spreadsheet
 function loadModel(guid){
-  console.log(modelsTable.children().length);
+
   var rows = modelsTable.find('tbody').children();
   for (var i = 0; i < rows.length; i++) {
     var e = $(rows[i]);
@@ -199,9 +216,9 @@ function loadModel(guid){
     }
 
   }
-
+  console.log("https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json");
   $.get({
-    url: urlQuery + guid,
+    url: "https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json",
     success: function(response) {
       var len = response.feed.entry.length;
       var parsedData = [];
@@ -255,8 +272,10 @@ function addModel(model){
       '<option value="3" '+ (model.orientation==3 ? 'selected' : '') +'> Vertical de frente </option>' +
       '<option value="4" '+ (model.orientation==4 ? 'selected' : '') +'> Horizontal de frente </option>' +
       '</select></td>' +
-      '<td><input type="checkbox" name="visible" checked>';
-  html += '</td></tr>';
+      '<td><input type="checkbox" name="visible" checked></td>' +
+      '<td><div class="btn-group" role="group"><button class="btn btn-default btn-remove-model"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>'+
+      '<button class="btn btn-default btn-edit-model"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></div></td>';
+  html += '</tr>';
   modelsTable.append(html);
 }
 
