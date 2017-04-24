@@ -19,7 +19,7 @@ class Viewer {
     this.group = new THREE.Group();
     this.autoRotate = false;
     this.fixCamera = false;
-    this.pieceScale = 0.98;
+    this.pieceScale = 1;
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xeaa04b,
@@ -100,14 +100,13 @@ class Viewer {
     var group = new THREE.Group();
     group.tag = data.tag;
     console.log("model created with tag: ", group.tag);
+
     // Creating meshes
+
     for (var i = 0; i < data.pieces.length; i++) {
       var result = this.createPiece(data.pieces[i]);
-      result.piece.dataIndex = i;
+      result.piece.dataIndex     = i;
       result.wireframe.dataIndex = i;
-
-      this.meshes.push(result.piece);
-      this.wireframes.push(result.wireframe);
 
       group.add(result.piece);
       group.add(result.wireframe);
@@ -172,7 +171,8 @@ class Viewer {
 
     pieceMesh.tag = data.name;
     pieceMesh.material.color.setHex(data.color);
-
+    pieceMesh.pieceType = 'piece';
+    wireframe.pieceType = 'wireframe';
     return {piece : pieceMesh, wireframe: wireframe};
   }
 
@@ -184,6 +184,7 @@ class Viewer {
 
     for (var i = 0; i < model.children.length; i++) {
       if (model.children[i].dataIndex == index){
+        model.remove(model.children[i]);
         model.remove(model.children[i]);
       }
     }
@@ -200,15 +201,16 @@ class Viewer {
     this.updatePivot();
   }
 
-  updateModel(data){
+  updateModel(d){
     var model;
     for (var i = 0; i < this.group.children.length; i++) {
-      if (this.group.children[i].tag == data.tag)
+      if (this.group.children[i].tag == d.tag)
         model = this.group.children[i]
     }
     if (model == undefined)
       return
 
+    var data = this.correctSize(d);
     model.position.x = data.x;
     model.position.y = data.y;
     model.position.z = data.z;
@@ -313,8 +315,13 @@ class Viewer {
   }
 
   togglePiecesVisibility(v){
-    for (var i = 0; i < this.meshes.length; i++) {
-      this.meshes[i].visible = v;
+    for (var i = 0; i < this.group.children.length; i++) {
+      var model = this.group.children[i];
+      for (var j = 0; j < model.children.length; j++) {
+        if (model.children[j].pieceType == 'piece'){
+          model.children[j].visible = v;
+        }
+      }
     }
   }
 

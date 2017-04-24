@@ -216,7 +216,7 @@ function loadModel(guid){
     }
 
   }
-  console.log("https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json");
+  
   $.get({
     url: "https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json",
     success: function(response) {
