@@ -102,7 +102,6 @@ class Viewer {
     console.log("model created with tag: ", group.tag);
 
     // Creating meshes
-
     for (var i = 0; i < data.pieces.length; i++) {
       var result = this.createPiece(data.pieces[i]);
       result.piece.dataIndex     = i;
@@ -112,6 +111,7 @@ class Viewer {
       group.add(result.wireframe);
     };
 
+    group.originalMatrix = group.matrix;
     return group;
   }
 
@@ -188,9 +188,10 @@ class Viewer {
         model.remove(model.children[i]);
       }
     }
-    //result.piece.visible = data.visible;
+    result.piece.visible = data.visible;
     result.wireframe.visible = data.visible;
     result.piece.dataIndex = index;
+    result.wireframe.dataIndex = index;
     //this.group.add(result.piece);
     //this.scene.add(result.wireframe);
     //this.meshes[index] = result.piece;
@@ -215,7 +216,42 @@ class Viewer {
     model.position.y = data.y;
     model.position.z = data.z;
     model.visible = data.visible;
+    this.rotateModel(model, data);
+  }
 
+  getModelSize(model){
+    var box = new THREE.Box3().setFromObject( model );
+    var z = Math.abs(box.max.z) + Math.abs(box.min.z);
+    var x = Math.abs(box.max.x) + Math.abs(box.min.x);
+    var y = Math.abs(box.max.y) + Math.abs(box.min.y);
+    return {x:x, y:y, z:z};
+  }
+  rotateModel(group, data){
+    group.matrix = group.originalMatrix;
+    if (data.orientation == 1){
+      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), Math.PI/2);
+      var s = this.getModelSize(group)
+      group.position.z = s.z;
+    }
+    else if (data.orientation == 2){
+      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), Math.PI/2);
+      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,0,1), Math.PI/2);
+      var s = this.getModelSize(group)
+      group.position.x = s.x;
+      group.position.z = s.z;
+    }
+    else if (data.orientation == 3){
+      group.rotation.x = 0;
+      group.rotation.y = 0;
+      group.rotation.z = 0;
+    }
+    else if (data.orientation == 4){
+      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), Math.PI/2);
+      this.rotateAroundWorldAxis(group, new THREE.Vector3(1,0,0), Math.PI/2);
+      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), -Math.PI/2);
+      var s = this.getModelSize(group)
+      group.position.x = s.x;
+    }
   }
 
   setLineWidth(v){
@@ -379,6 +415,15 @@ class Viewer {
     document.body.appendChild(result);
     result.click();
     document.body.removeChild(result);
+  }
+
+  // Rotate an object around an arbitrary axis in world space
+  rotateAroundWorldAxis(object, axis, radians) {
+      var rotWorldMatrix = new THREE.Matrix4();
+      rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+      rotWorldMatrix.multiply(object.matrix);        // pre-multiply
+      object.matrix = rotWorldMatrix;
+      object.rotation.setFromRotationMatrix(object.matrix)
   }
 }
 
