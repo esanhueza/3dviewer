@@ -211,12 +211,11 @@ class Viewer {
     if (model == undefined)
       return
 
-    var data = this.correctSize(d);
-    model.position.x = data.x;
-    model.position.y = data.y;
-    model.position.z = data.z;
-    model.visible = data.visible;
-    this.rotateModel(model, data);
+    model.position.x = d.x;
+    model.position.y = d.y;
+    model.position.z = d.z;
+    model.visible = d.visible;
+    this.rotateModel(model, d);
   }
 
   getModelSize(model){
@@ -228,30 +227,10 @@ class Viewer {
   }
   rotateModel(group, data){
     group.matrix = group.originalMatrix;
-    if (data.orientation == 1){
-      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), Math.PI/2);
-      var s = this.getModelSize(group)
-      group.position.z = s.z;
-    }
-    else if (data.orientation == 2){
-      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), Math.PI/2);
-      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,0,1), Math.PI/2);
-      var s = this.getModelSize(group)
-      group.position.x = s.x;
-      group.position.z = s.z;
-    }
-    else if (data.orientation == 3){
-      group.rotation.x = 0;
-      group.rotation.y = 0;
-      group.rotation.z = 0;
-    }
-    else if (data.orientation == 4){
-      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), Math.PI/2);
-      this.rotateAroundWorldAxis(group, new THREE.Vector3(1,0,0), Math.PI/2);
-      this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), -Math.PI/2);
-      var s = this.getModelSize(group)
-      group.position.x = s.x;
-    }
+    console.log(data.rx, data.ry, data.rz);
+    this.rotateAroundWorldAxis(group, new THREE.Vector3(1,0,0), data.rx * Math.PI/180);
+    this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), data.ry * Math.PI/180);
+    this.rotateAroundWorldAxis(group, new THREE.Vector3(0,0,1), data.rz * Math.PI/180);
   }
 
   setLineWidth(v){

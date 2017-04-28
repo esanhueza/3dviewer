@@ -216,7 +216,7 @@ function loadModel(guid){
     }
 
   }
-  
+
   $.get({
     url: "https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json",
     success: function(response) {
@@ -250,7 +250,7 @@ function loadModel(guid){
       }
       // se actualiza la informacion en el visor y en la tabla de piezas
 
-      var model = {guid:guid, tag: "MOD" + (guidList.indexOf(guid)+1), x:0, y:0, z:0, orientation:1,visible:true};
+      var model = {guid:guid, tag: "MOD" + (guidList.indexOf(guid)+1), x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
 
       addPiecesList(parsedData, model.tag);
       tool.addModel({tag: model.tag, pieces:parsedData});
@@ -262,16 +262,13 @@ function loadModel(guid){
 // Agrega un modelo a la tabla de modelos
 function addModel(model){
   var html = '<tr data-guid="'+model.guid+'">' +
-      '<td>'+model.tag+'</td>'+
-      '<td><input type="number" size="1" step="0.1" value="'+model.x+'"></td>' +
-      '<td><input type="number" size="1" step="0.1" value="'+model.y+'"></td>' +
-      '<td><input type="number" size="1" step="0.1" value="'+model.z+'"></td>' +
-      '<td><select>' +
-      '<option value="1" '+ (model.orientation==1 ? 'selected' : '') +'> Vertical de corte </option>' +
-      '<option value="2" '+ (model.orientation==2 ? 'selected' : '') +'> Horizontal de corte </option>' +
-      '<option value="3" '+ (model.orientation==3 ? 'selected' : '') +'> Vertical de frente </option>' +
-      '<option value="4" '+ (model.orientation==4 ? 'selected' : '') +'> Horizontal de frente </option>' +
-      '</select></td>' +
+      '<td class="col-sm-2">'+model.tag+'</td>'+
+      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.x+'" placeholder="X"></td>' +
+      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.y+'" placeholder="Y"></td>' +
+      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.z+'" placeholder="Z"></td>' +
+      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.rx+'" placeholder="X"></td>' +
+      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.ry+'" placeholder="Y"></td>' +
+      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.rz+'" placeholder="Z"></td>' +
       '<td><input type="checkbox" name="visible" checked></td>' +
       '<td><div class="btn-group" role="group"><button class="btn btn-default btn-remove-model"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>'+
       '<button class="btn btn-default btn-edit-model"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></div></td>';
@@ -287,8 +284,10 @@ function updateModel(evt){
   newData.x = parseInt($(row[1]).find('input').val());
   newData.y = parseInt($(row[2]).find('input').val());
   newData.z = parseInt($(row[3]).find('input').val());
-  newData.orientation = parseInt($(row[4]).find('select').val());
-  newData.visible = $(row[5]).find('input').is(':checked');
+  newData.rx = parseInt($(row[4]).find('input').val());
+  newData.ry = parseInt($(row[5]).find('input').val());
+  newData.rz = parseInt($(row[6]).find('input').val());
+  newData.visible = $(row[7]).find('input').is(':checked');
   tool.updateModel(newData);
 }
 
