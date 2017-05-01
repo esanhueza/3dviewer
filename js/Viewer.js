@@ -227,10 +227,9 @@ class Viewer {
   }
   rotateModel(group, data){
     group.matrix = group.originalMatrix;
-    console.log(data.rx, data.ry, data.rz);
     this.rotateAroundWorldAxis(group, new THREE.Vector3(1,0,0), data.rx * Math.PI/180);
-    // this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), data.ry * Math.PI/180);
-    // this.rotateAroundWorldAxis(group, new THREE.Vector3(0,0,1), data.rz * Math.PI/180);
+    this.rotateAroundWorldAxis(group, new THREE.Vector3(0,1,0), data.ry * Math.PI/180);
+    this.rotateAroundWorldAxis(group, new THREE.Vector3(0,0,1), data.rz * Math.PI/180);
   }
 
   setLineWidth(v){
