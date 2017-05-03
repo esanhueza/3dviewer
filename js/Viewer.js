@@ -41,7 +41,6 @@ class Viewer {
         opacity: 0.2
       })
     };
-
     var self = this;
   }
   init(container){
@@ -59,6 +58,10 @@ class Viewer {
     this.scene.add( this.group );
     this.createGrid();
     render();
+
+    this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+		// this.controls.addEventListener( 'change', render );
+		// this.controls.enableZoom = tr;
   }
 
   createModels(data){
@@ -142,12 +145,12 @@ class Viewer {
       position = new THREE.Vector3(data.w, data.h, data.l);
     }
 
-    data.x = data.x/200;
-    data.y = data.y/200;
-    data.z = data.z/200;
-    data.w = Math.abs(position.x/200);
-    data.h = Math.abs(position.y/200);
-    data.l = Math.abs(position.z/200);
+    data.x = data.x/100;
+    data.y = data.y/100;
+    data.z = data.z/100;
+    data.w = Math.abs(position.x/100);
+    data.h = Math.abs(position.y/100);
+    data.l = Math.abs(position.z/100);
     return data;
   }
   createPiece(d){
@@ -192,10 +195,6 @@ class Viewer {
     result.wireframe.visible = data.visible;
     result.piece.dataIndex = index;
     result.wireframe.dataIndex = index;
-    //this.group.add(result.piece);
-    //this.scene.add(result.wireframe);
-    //this.meshes[index] = result.piece;
-    //this.wireframes[index] = result.wireframe;
 
     model.add(result.piece);
     model.add(result.wireframe);
@@ -211,9 +210,9 @@ class Viewer {
     if (model == undefined)
       return
 
-    model.position.x = d.x/200;
-    model.position.y = d.y/200;
-    model.position.z = d.z/200;
+    model.position.x = d.x/100;
+    model.position.y = d.y/100;
+    model.position.z = d.z/100;
     model.visible = d.visible;
     this.rotateModel(model, d);
   }
@@ -324,10 +323,6 @@ class Viewer {
     }
   }
 
-  rotate(value){
-    this.centerPivot.rotation.y += value;
-  }
-
   togglePiecesVisibility(v){
     for (var i = 0; i < this.group.children.length; i++) {
       var model = this.group.children[i];
@@ -337,23 +332,6 @@ class Viewer {
         }
       }
     }
-  }
-
-  zoom(value){
-    this.camera.translateZ( value * 1 );
-  }
-
-  moveCamera(d){
-    this.camera.translateX(-d.x / 100);
-    this.camera.translateY(d.y / 100);
-  }
-
-  lookAtCenter(d){
-    this.camera.lookAt({x:0,y:0,z:0});
-  }
-
-  toggleFixedCamera(v){
-    this.fixCamera = v;
   }
 
 
@@ -414,6 +392,4 @@ function render(){
   if (viewer.autoRotate){
     viewer.centerPivot.rotation.y += 0.01;
   }
-  if (viewer.fixCamera)
-    viewer.camera.lookAt({x:0,y:0,z:0});
 }
