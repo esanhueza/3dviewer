@@ -9,6 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/spinner.css" rel="stylesheet" type="text/css">
 		<link href="css/index.css" rel="stylesheet" type="text/css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -30,15 +31,23 @@
           <div class="panel-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist">
-              <li role="presentation" class="active"><a href="#models" aria-controls="home" role="tab" data-toggle="tab">Modelos</a></li>
+              <li role="presentation" class="active"><a href="#models-load-tab" aria-controls="home" role="tab" data-toggle="tab">Modelos</a></li>
               <li role="presentation"><a href="#preferences" aria-controls="profile" role="tab" data-toggle="tab">Configuracion</a></li>
             </ul>
 
             <!-- Tab panes -->
             <div class="tab-content">
-              <div role="tabpanel" class="tab-pane active" id="models">
+              <div role="tabpanel" class="tab-pane active" id="models-load-tab">
                 <br>
-                <div class="col-xs-12" >
+                <div class="spinner" style="display:none">
+                  <div class="rect1"></div>
+                  <div class="rect2"></div>
+                  <div class="rect3"></div>
+                  <div class="rect4"></div>
+                  <div class="rect5"></div>
+                </div>
+
+                <div class="col-xs-12 content">
                   <div class="input-group">
                     <select id="model-spreadsheet" name="spreadsheet" type="text" class="form-control"></select>
                       <span class="input-group-btn">
@@ -142,6 +151,7 @@
                 <ul class="nav nav-tabs" role="tablist">
                   <li role="presentation" class="active"><a href="#piecesTab" aria-controls="piecesTab" role="tab" data-toggle="tab">Piezas</a></li>
                   <li role="presentation"><a href="#modelsTab" aria-controls="modelsTab" role="tab" data-toggle="tab">Modelos</a></li>
+                  <li role="presentation"><a href="#roomTab" aria-controls="roomsTab" role="tab" data-toggle="tab">Habitacion</a></li>
                 </ul>
 
                 <!-- Tab panes -->
@@ -175,6 +185,107 @@
                       </tbody>
                     </table>
                   </div>
+
+                  <div role="tabpanel" class="tab-pane" id="roomTab">
+                    <br>
+                    <div class="panel panel-default">
+
+                      <div class="panel-body">
+                        <div class="row">
+
+                          <div class="col-lg-3">
+                            <div class="input-group">
+                              <button id="btn-create-room" type="button" class="btn btn-primary" aria-label="...">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                Crear
+                              </button>
+                              <button id="btn-remove-room" type="button" class="btn btn-warning" aria-label="...">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                Eliminar
+                              </button>
+                            </div><!-- /input-group -->
+                          </div><!-- /.col-lg-6 -->
+
+
+                        </div><!-- /.row -->
+                      </div>
+                    </div>
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Dimensiones de la habitación</h3>
+                      </div>
+                      <div class="panel-body">
+                        <div class="row">
+
+                          <div class="col-lg-3">
+                            <div class="input-group">
+                              <input id="input-room-width" type="integer" step="1" class="form-control" aria-label="..." placeholder="Ancho" value="3">
+                            </div><!-- /input-group -->
+                          </div><!-- /.col-lg-6 -->
+
+                          <div class="col-lg-3">
+                            <div class="input-group">
+                              <input id="input-room-height" type="integer" step="1" class="form-control" aria-label="..." placeholder="Altura" value="2">
+                            </div><!-- /input-group -->
+                          </div><!-- /.col-lg-6 -->
+
+                          <div class="col-lg-3">
+                            <div class="input-group">
+                              <input id="input-room-length" type="integer" step="1" class="form-control" aria-label="..." placeholder="Largo" value="2">
+                            </div><!-- /input-group -->
+                          </div><!-- /.col-lg-6 -->
+
+                        </div><!-- /.row -->
+                      </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Colores</h3>
+                      </div>
+                      <div class="panel-body">
+
+                          <form class="form-horizontal">
+                            <div class="form-group">
+                              <label for="input-wall-color" class="col-sm-1 control-label">Murallas</label>
+                              <div class="col-sm-1">
+                                  <input id="input-wall-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                              </div>
+                              <label for="input-ceil-color" class="col-sm-1 control-label">Techo</label>
+                              <div class="col-sm-1">
+                                  <input id="input-ceil-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                              </div>
+                              <label for="input-floor-color" class="col-sm-1 control-label">Piso</label>
+                              <div class="col-sm-1">
+                                  <input id="input-floor-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                              </div>
+                            </div>
+                          </form>
+
+                      </div>
+                    </div>
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Luz</h3>
+                      </div>
+                      <div class="panel-body">
+                          <form class="form-horizontal">
+                            <div class="form-group">
+                              <label for="input-light-color" class="col-sm-1 control-label">Color</label>
+                              <div class="col-sm-1">
+                                  <input id="input-light-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                              </div>
+                              <label for="input-light-intensity" class="col-sm-1 control-label">Intensidad</label>
+                              <div class="col-sm-2">
+                                  <input id="input-light-intensity" type="range" step="0.1" min="0" max="1" class="form-control" aria-label="..." value="1">
+                              </div>
+                            </div>
+                          </form>
+
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
 
   			      </div>
@@ -182,26 +293,32 @@
         </div>
 	 </div>
 
-   <!-- Table -->
-   <table id="pieces-table" class="table pieces-table" style="display: none">
-     <thead>
-       <tr>
-         <th class="col-md-1">#</th>
-         <th class="col-md-1">TAG</th>
-         <th class="col-md-1">Ancho</th>
-         <th class="col-md-1">Espesor</th>
-         <th class="col-md-1">Largo</th>
-         <th class="col-md-1">X</th>
-         <th class="col-md-1">Y</th>
-         <th class="col-md-1">Z</th>
-         <th class="col-md-1">Color</th>
-         <th class="col-md-1">Orientación</th>
-         <th class="col-md-1">Visible</th>
-       </tr>
-     </thead>
-     <tbody>
-     </tbody>
-   </table>
+
+
+
+   <!-- Hidden Content -->
+   <div style="display: none">
+
+     <table id="pieces-table" class="table pieces-table" >
+       <thead>
+         <tr>
+           <th class="col-md-1">#</th>
+           <th class="col-md-1">TAG</th>
+           <th class="col-md-1">Ancho</th>
+           <th class="col-md-1">Espesor</th>
+           <th class="col-md-1">Largo</th>
+           <th class="col-md-1">X</th>
+           <th class="col-md-1">Y</th>
+           <th class="col-md-1">Z</th>
+           <th class="col-md-1">Color</th>
+           <th class="col-md-1">Orientación</th>
+           <th class="col-md-1">Visible</th>
+         </tr>
+       </thead>
+       <tbody>
+       </tbody>
+     </table>
+    </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -210,7 +327,9 @@
 		<script src="js/three.min.js"></script>
     <script src="js/gif.js"></script>
 		<script src="js/OBJExporter.js"></script>
+		<script src="js/OBJLoader.js"></script>
 		<script src="js/OrbitControls.js"></script>
+		<script src="js/threex.domevents.js"></script>
 		<script src="js/Room.js"></script>
 		<script src="js/Viewer.js"></script>
 		<script src="js/app.js"></script>

@@ -70,11 +70,6 @@ $('#rotate-check').on('change', function (){
 // $('#model-spreadsheet').on('change', function (){
 //   loadModel(this.value);
 // });
-$('#btn-load-all').on('click', function (){
-  for (var i = 0; i < guidList.length; i++) {
-    loadModel(guidList[i]);
-  }
-});
 
 $('#fixed-camera-check').on('change', function (){
     tool.toggleFixedCamera(this.checked);
@@ -89,7 +84,12 @@ $('#edge-color').on('change', function (){
 });
 
 $('#btn-export').on('click', function(){
-  tool.exportToObj.call(tool, filename);
+  $("#models-load-tab .spinner").show();
+  $("#models-load-tab .content").hide
+  tool.exportToObj.call(tool, filename, function(){
+    $("#models-load-tab .spinner").hide();
+    $("#models-load-tab .content").show();
+  });
 });
 
 $('#btn-export-img').on('click', function(){
@@ -101,20 +101,69 @@ $('#tab-content-models').on('change', '.tab-pane tbody tr td input, .tab-pane tb
 $('#models-table tbody').on('change', 'tr td input, tr td select', updateModel);
 $('#models-table tbody').on('click', '.btn-remove-model', function(){
   var row = $(this).parentsUntil('tbody');
-  var guid = row[row.length-1].attr('data-guid')
-  console.log(guid);
+  var guid = row.parent().attr('data-guid')
+  tool.removeModel(guid)
 });
 $('#models-table tbody').on('click', '.btn-edit-model', function(){
   console.log("btn-edit-model");
 });
 
 $('#btn-load').on('click', function(){
-  loadModel($("#model-spreadsheet")[0].value)
-});
-$('#btn-export-gif').on('click', function(){
-  tool.exportGIF.call(tool, filename);
+  loadModel([$("#model-spreadsheet")[0].value])
 });
 
+$('#btn-load-all').on('click', function (){
+  loadModel(guidList)
+});
+
+$('#btn-export-gif').on('click', function(){
+  $("#models-load-tab .spinner").show();
+  $("#models-load-tab .content").hide();
+  tool.exportGIF.call(tool, filename, function(){
+    $("#models-load-tab .spinner").hide();
+    $("#models-load-tab .content").show();
+  });
+});
+
+
+$('#btn-create-room').on('click', function (){
+  var w = $("#input-room-width").val()
+  var h = $("#input-room-height").val()
+  var l = $("#input-room-length").val()
+  tool.createRoom(w,h,l)
+});
+$('#btn-remove-room').on('click', function (){
+  tool.removeRoom();
+});
+
+// room update events
+$('#input-room-width, #input-room-height, #input-room-length').on('change', function (){
+  var w = $("#input-room-width").val()
+  var h = $("#input-room-height").val()
+  var l = $("#input-room-length").val()
+  tool.updateRoom({dimension:{
+    width: w,height:h,length:l,
+  }})
+});
+
+$('#input-wall-color, #input-ceil-color, #input-floor-color, #input-light-color, #input-light-intensity').on('change', function (){
+  var wc = $("#input-wall-color").val()
+  var fc = $("#input-floor-color").val()
+  var cc = $("#input-ceil-color").val()
+  var lightColor = $("#input-light-color").val()
+  var lightIntensity = $("#input-light-intensity").val()
+  tool.updateRoom({
+    color:{
+      wall: wc.replace("#", "0x"),
+      floor: fc.replace("#", "0x"),
+      ceil: cc.replace("#", "0x"),
+    },
+    light:{
+      color: lightColor.replace("#", "0x"),
+      intensity: lightIntensity,
+    }
+  })
+});
 
 loadList();
 loadGuids();
@@ -125,8 +174,6 @@ function loadGuids(){
     select.append('<option value='+guidList[i-1]+'>MOD'+(i) +'</option>')
 
   }
-
-
 }
 
 function loadList(){
@@ -157,62 +204,85 @@ function loadList(){
 }
 
 // carga la información desde una hoja especifica (guid) del spreadsheet
-function loadModel(guid){
-
+function loadModel(modelsToLoad){
+  $("#models-load-tab .spinner").show();
+  $("#models-load-tab .content").hide();
   var rows = modelsTable.find('tbody').children();
-  for (var i = 0; i < rows.length; i++) {
-    var e = $(rows[i]);
-    if (e.attr("data-guid") == guid){
-      var tag = "MOD" + (guidList.indexOf(guid)+1);
-      tool.removeModel({tag: tag});
-      e.remove();
-      $('#'+tag+'Tab').remove();
-      $('#nav-'+tag).remove();
-      break
+  for (var i = 0; i < modelsToLoad.length; i++) {
+    var guid = modelsToLoad[i];
+
+    // first look if the model is already loaded
+    for (var k = 0; k < rows.length; k++) {
+      var e = $(rows[k]);
+      // if is already loaded, remove it and load it again
+      if (e.attr("data-guid") == guid){
+        var tag = "MOD" + (guidList.indexOf(guid)+1);
+        tool.removeModel({tag: tag});
+        e.remove();
+        $('#'+tag+'Tab').remove();
+        $('#nav-'+tag).remove();
+      }
     }
 
-  }
-
-  $.get({
-    url: "https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json",
-    success: function(response) {
-      var len = response.feed.entry.length;
-      var parsedData = [];
-      var data = response.feed.entry;
-      filename = data[0].content.$t.split(', ')[6].split(':')[0] + ' ' +
-                     data[0].content.$t.split(', ')[7].split(':')[0] + ':' +
-                     data[0].content.$t.split(', ')[8].split(':')[0];
-      for (var i = 1; i < len; i++) {
-        var obj = data[i].content.$t.split(', ')
-        // ignore column 1, is empty
-        if (obj.length >= 9){
-          parsedData.push({
-            name: obj[0].split(':')[1],
-            l: parseFloat(obj[1].split(':')[1].replace(',', '.')),
-            w: parseFloat(obj[2].split(':')[1].replace(',', '.')),
-            h: parseFloat(obj[3].split(':')[1].replace(',', '.')),
-            orientation: parseInt(obj[4].split(':')[1]),
-            color: '0x' + obj[5].split(':')[1].replace(' ', ''),
-            y: parseFloat(obj[6].split(':')[1].replace(',', '.')),
-            x: parseFloat(obj[7].split(':')[1].replace(',', '.')),
-            z: parseFloat(obj[8].split(':')[1].replace(',', '.')),
-          });
-        }
-        else{
-          if (obj.length > 1 ){
-            //console.log('Piece ' + data[i].title.$t + ' is missing data.');
+    $.get({
+      modelGuid: guid,
+      url: "https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json",
+      success: function(response) {
+        var len = response.feed.entry.length;
+        var parsedData = [];
+        var data = response.feed.entry;
+        filename = data[0].content.$t.split(', ')[6].split(':')[0] + ' ' +
+                       data[0].content.$t.split(', ')[7].split(':')[0] + ':' +
+                       data[0].content.$t.split(', ')[8].split(':')[0];
+        for (var i = 1; i < len; i++) {
+          var obj = data[i].content.$t.split(', ')
+          // ignore column 1, is empty
+          if (obj.length >= 9){
+            parsedData.push({
+              name: obj[0].split(':')[1],
+              l: parseFloat(obj[1].split(':')[1].replace(',', '.')),
+              w: parseFloat(obj[2].split(':')[1].replace(',', '.')),
+              h: parseFloat(obj[3].split(':')[1].replace(',', '.')),
+              orientation: parseInt(obj[4].split(':')[1]),
+              color: '0x' + obj[5].split(':')[1].replace(' ', ''),
+              y: parseFloat(obj[6].split(':')[1].replace(',', '.')),
+              x: parseFloat(obj[7].split(':')[1].replace(',', '.')),
+              z: parseFloat(obj[8].split(':')[1].replace(',', '.')),
+            });
+          }
+          else{
+            if (obj.length > 1 ){
+              //console.log('Piece ' + data[i].title.$t + ' is missing data.');
+            }
           }
         }
+        // se actualiza la informacion en el visor y en la tabla de piezas
+
+        var model = {guid:this.modelGuid, tag: "MOD" + (guidList.indexOf(this.modelGuid)+1), x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
+        addPiecesList(parsedData, model.tag);
+        tool.addModel({tag: model.tag, pieces:parsedData});
+        addModel(model);
+
+        // mark this model as loaded
+        modelsToLoad[modelsToLoad.indexOf(this.modelGuid)] = true;
+
+
+        // check if all models were loaded
+        var taskDone = true;
+        for (var j = 0; j < modelsToLoad.length; j++) {
+          if (modelsToLoad[j] != true){
+            taskDone = false
+          }
+        }
+        // if this was the last task, hide spinner
+        if (taskDone){
+          $("#models-load-tab .spinner").hide();
+          $("#models-load-tab .content").show();
+        }
       }
-      // se actualiza la informacion en el visor y en la tabla de piezas
+    });
 
-      var model = {guid:guid, tag: "MOD" + (guidList.indexOf(guid)+1), x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
-
-      addPiecesList(parsedData, model.tag);
-      tool.addModel({tag: model.tag, pieces:parsedData});
-      addModel(model);
-    }
-  });
+  }
 }
 
 // Agrega un modelo a la tabla de modelos
@@ -227,7 +297,7 @@ function addModel(model){
       '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.rz+'" placeholder="Z"></td>' +
       '<td><input type="checkbox" name="visible" checked></td>' +
       '<td><div class="btn-group" role="group"><button class="btn btn-default btn-remove-model"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>'+
-      '<button class="btn btn-default btn-edit-model"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button></div></td>';
+      '</div></td>';
   html += '</tr>';
   modelsTable.append(html);
 }

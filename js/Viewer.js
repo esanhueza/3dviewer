@@ -4,6 +4,7 @@ class Viewer {
   constructor() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color( 0xf2f2f2 );
+    this.domEvents	= null;
     this.renderer = new THREE.WebGLRenderer({
       preserveDrawingBuffer: true,
       antialiasing: true,
@@ -21,14 +22,10 @@ class Viewer {
     this.fixCamera = false;
     this.pieceScale = 1;
     this.materials = {
-      'wood' : new THREE.MeshPhongMaterial( {
-        color: 0xeaa04b,
-        emissive: 0xeaa04b,
+      'wood' : new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
         side: THREE.FrontSide,
         shading: THREE.FlatShading,
-        vertexColors: THREE.FaceColors,
-        transparent: true,
-        opacity: 0.9,
       } ),
       'wireframe' : new THREE.LineBasicMaterial({
         color: 0x000000,
@@ -43,14 +40,16 @@ class Viewer {
     };
     var self = this;
   }
+
   init(container){
     this.container = container;
     this.renderer.setSize( container.offsetWidth, container.offsetHeight );
     this.container.appendChild( this.renderer.domElement );
-    this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.1, 1000 );
+    this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.2, 20 );
+    this.domEvents = new THREEx.DomEvents(this.camera, this.renderer.domElement)
     // Set camera position
-    this.camera.position.y = 10;
-    this.camera.position.z = 12;
+    this.camera.position.y = 6;
+    this.camera.position.z = 8;
     //this.camera.rotation.x = -0.4;
     // Object by which the camera ratates around
     this.centerPivot.add( this.camera )
@@ -59,9 +58,30 @@ class Viewer {
     this.createGrid();
     render();
 
+    this.room = null;
     this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
-		// this.controls.addEventListener( 'change', render );
-		// this.controls.enableZoom = tr;
+  }
+
+  removeRoom(){
+    this.scene.remove(this.room.getMesh())
+  }
+
+  createRoom(w,h,l){
+    if (this.room){
+      this.removeRoom()
+    }
+    this.room = new Room(w,h,l, this.domEvents);
+    this.scene.add(this.room.getMesh());
+  }
+
+  updateRoom(data){
+    if(data.hasOwnProperty('dimension')){
+      this.room.setSize(data.dimension);
+    }
+    if(data.hasOwnProperty('color')){
+      this.room.setColors(data.color);
+      this.room.setLight(data.light);
+    }
   }
 
   createModels(data){
@@ -125,7 +145,9 @@ class Viewer {
     this.centerPivot.position.y = (box.max.y - box.min.y) / 2;
     this.centerPivot.position.z = (box.max.z - box.min.z) / 2;
   }
-
+  rotate(r){
+    this.centerPivot.rotation.y += r;
+  }
   correctSize(data){
     var position;
     // rotate position Vector3
@@ -145,19 +167,20 @@ class Viewer {
       position = new THREE.Vector3(data.w, data.h, data.l);
     }
 
-    data.x = data.x/100;
-    data.y = data.y/100;
-    data.z = data.z/100;
-    data.w = Math.abs(position.x/100);
-    data.h = Math.abs(position.y/100);
-    data.l = Math.abs(position.z/100);
+    data.x = data.x/1000;
+    data.y = data.y/1000;
+    data.z = data.z/1000;
+    data.w = Math.abs(position.x/1000);
+    data.h = Math.abs(position.y/1000);
+    data.l = Math.abs(position.z/1000);
     return data;
   }
   createPiece(d){
     var data = this.correctSize(d);
     var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
     // var wireframeGeometry = new THREE.EdgesGeometry( geometry );
-    var pieceMesh = new THREE.Mesh(geometry, this.materials[data.material]);
+    console.log("data.material: ", data.material);
+    var pieceMesh = new THREE.Mesh(geometry, this.materials['wood']);
     var edges = new THREE.EdgesGeometry( geometry );
     var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
 
@@ -210,9 +233,9 @@ class Viewer {
     if (model == undefined)
       return
 
-    model.position.x = d.x/100;
-    model.position.y = d.y/100;
-    model.position.z = d.z/100;
+    model.position.x = d.x/1000;
+    model.position.y = d.y/1000;
+    model.position.z = d.z/1000;
     model.visible = d.visible;
     this.rotateModel(model, d);
   }
@@ -302,12 +325,10 @@ class Viewer {
   }
 
   // create obj file with the meshes
-  exportToObj(filename){
+  exportToObj(filename, callback){
     var exporter = new THREE.OBJExporter();
-    // remove wireframes and grid
-    for (var i = 0; i < this.wireframes.length; i++) {
-      this.wireframes[i].parent.remove(this.wireframes[i]);
-    }
+
+
 		var result = exporter.parse(this.group);
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
@@ -317,10 +338,8 @@ class Viewer {
     element.click();
     document.body.removeChild(element);
 
-    // add wireframes and grid
-    for (var i = 0; i < this.wireframes.length; i++) {
-      this.group.add(this.wireframes[i]);
-    }
+
+    callback()
   }
 
   togglePiecesVisibility(v){
@@ -335,7 +354,7 @@ class Viewer {
   }
 
 
-  exportGIF(filename){
+  exportGIF(filename, callback){
     var steps = 8;
     var exporter = new GIF({
       workers: 2,
@@ -359,6 +378,7 @@ class Viewer {
       document.body.appendChild(result);
       result.click();
       document.body.removeChild(result);
+      callback()
     });
     exporter.render();
   }
