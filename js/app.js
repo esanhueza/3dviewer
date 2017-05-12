@@ -33,6 +33,8 @@ var guidList = ['1Io9jL33nJIm5jZVzr5UtQTqny-1IRmnOLO2XK-ZOSjE',
                 '1G_dq8XNSpLsK5LgQAEfOLtvHuf4NpNU2LobW0JH6vLg',
                 '1omGhESDYyaz4cnay8W9Azk3brT6iePER9eCDuufZ48A'];
 
+
+
 var link = $('#input-list-spreadsheet').val();
 var match = new RegExp("d\/(.*)\/").exec(link);
 
@@ -197,7 +199,7 @@ function loadList(){
 
     console.log("Cargando modelo.");
     currentGuid = guidList[QueryString.model-1];
-    loadModel(currentGuid);
+    loadModel([currentGuid]);
   }
 
 
@@ -207,6 +209,10 @@ function loadList(){
 function loadModel(modelsToLoad){
   $("#models-load-tab .spinner").show();
   $("#models-load-tab .content").hide();
+
+  var modelsLoaded = Array(modelsToLoad.length)
+  modelsLoaded.fill(false)
+
   var rows = modelsTable.find('tbody').children();
   for (var i = 0; i < modelsToLoad.length; i++) {
     var guid = modelsToLoad[i];
@@ -226,6 +232,7 @@ function loadModel(modelsToLoad){
 
     $.get({
       modelGuid: guid,
+      modelIndex: i,
       url: "https://spreadsheets.google.com/feeds/list/" + guid + "/od6/public/full?alt=json",
       success: function(response) {
         var len = response.feed.entry.length;
@@ -264,13 +271,13 @@ function loadModel(modelsToLoad){
         addModel(model);
 
         // mark this model as loaded
-        modelsToLoad[modelsToLoad.indexOf(this.modelGuid)] = true;
+        modelsLoaded[this.modelIndex] = true;
 
 
         // check if all models were loaded
         var taskDone = true;
-        for (var j = 0; j < modelsToLoad.length; j++) {
-          if (modelsToLoad[j] != true){
+        for (var j = 0; j < modelsLoaded.length; j++) {
+          if (modelsLoaded[j] != true){
             taskDone = false
           }
         }
@@ -279,8 +286,13 @@ function loadModel(modelsToLoad){
           $("#models-load-tab .spinner").hide();
           $("#models-load-tab .content").show();
         }
-      }
-    });
+    },
+
+    error: function(response){
+      console.log("error loading model");
+      console.log(response);
+    }
+  });
 
   }
 }

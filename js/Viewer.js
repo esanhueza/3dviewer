@@ -98,7 +98,7 @@ class Viewer {
 
   findModelByTag(tag){
     for (var i = 0; i < this.group.children.length; i++) {
-      console.log(this.group.children[i].tag, tag, this.group.children[i].tag ==tag);
+      // console.log(this.group.children[i].tag, tag, this.group.children[i].tag ==tag);
       if (this.group.children[i].tag == tag) {
         return this.group.children[i];
       }
@@ -178,9 +178,8 @@ class Viewer {
   createPiece(d){
     var data = this.correctSize(d);
     var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
-    // var wireframeGeometry = new THREE.EdgesGeometry( geometry );
-    console.log("data.material: ", data.material);
-    var pieceMesh = new THREE.Mesh(geometry, this.materials['wood']);
+
+    var pieceMesh = new THREE.Mesh(geometry, this.materials['wood'].clone());
     var edges = new THREE.EdgesGeometry( geometry );
     var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
 
@@ -206,7 +205,7 @@ class Viewer {
     //this.meshes[index].parent.remove(this.meshes[index])
     //this.wireframes[index].parent.remove(this.wireframes[index])
     var result = this.createPiece(data);
-    var model = this.findModelByTag(tag);
+    var model  = this.findModelByTag(tag);
 
     for (var i = 0; i < model.children.length; i++) {
       if (model.children[i].dataIndex == index){
@@ -214,6 +213,7 @@ class Viewer {
         model.remove(model.children[i]);
       }
     }
+
     result.piece.visible = data.visible;
     result.wireframe.visible = data.visible;
     result.piece.dataIndex = index;
@@ -261,7 +261,6 @@ class Viewer {
     this.pieceScale = v;
     for (var i = 0; i < this.meshes.length; i++) {
       this.meshes[i].scale.set(this.pieceScale,this.pieceScale,this.pieceScale);
-      console.log(this.pieceScale);
     }
   }
 
