@@ -3,7 +3,7 @@
 class Room {
   constructor(w, h, l, domEvents) {
     this.scene = new THREE.Group();
-
+    this.objects = [];
     this.materials = {
       'wall': new THREE.MeshPhongMaterial( {
         color: 0xaaaaaa,
@@ -40,23 +40,22 @@ class Room {
       this.materials['wall']
     ]);
 
-    this.mesh.scale.x = w
-    this.mesh.scale.y = h
-    this.mesh.scale.z = l
-    this.mesh.translateX(w/2);
-    this.mesh.translateY(h/2);
-    this.mesh.translateZ(l/2);
+    this.mesh.scale.x = w/1000
+    this.mesh.scale.y = h/1000
+    this.mesh.scale.z = l/1000
+    this.mesh.translateX(w/1000/2);
+    this.mesh.translateY(h/1000/2);
+    this.mesh.translateZ(l/1000/2);
 
 
 
     this.scene.add(this.mesh)
     this.light = new THREE.PointLight( 0xfffbba, 1, 200, 2 );
-    this.light.position.set( w/2, h-0.5, l-0.5 );
+    this.light.position.set( w/1000/2, h/1000, l/1000 );
     this.scene.add( this.light );
     this.loadTextures()
-    this.loadDoor()
-    this.doors = []
-    this.loadWindow()
+    //this.loadDoor()
+    //this.loadWindow()
 
     // create box to show what object is currently being edited
     this.editorBox   = new THREE.BoxHelper();
@@ -99,6 +98,51 @@ class Room {
     this.selectedObject = object
   }
 
+
+  /* public method
+   * find a start the update or laod a new object
+   */
+  updateObject(data){
+    var obj = findObjectByTag(this.objects, data.tag);
+    // if is already loaded, just update
+    if (obj){
+      this.updateData(obj, data);
+    }
+    else{
+      // create object
+      this.loadObject(data);
+    }
+  }
+
+  removeObject(tag){
+    var obj = findObjectByTag(this.objects, tag);
+    var index = this.objects.indexOf(obj);
+    this.scene.remove(obj);
+    this.objects.slice(index,1);
+  }
+
+  /* private method
+   * update data from the loaded object
+   */
+  updateData(obj, data){
+    obj.position.set(data.x/1000, data.y/1000, data.z/1000);
+    obj.tag = data.tag;
+  }
+
+
+  loadObject(data){
+    var loader = new THREE.OBJLoader( );
+    var that = this;
+
+		loader.load( 'assets/' + data.type + '.obj', function ( object ) {
+      that.makeObjectSelectable(object);
+      that.scene.add(object);
+      that.objects.push(object);
+      that.updateData(object, data);
+    })
+  }
+
+
   loadDoor(){
     var loader = new THREE.OBJLoader( );
     var that = this;
@@ -131,9 +175,12 @@ class Room {
 
   setSize(data){
     this.mesh.position.set(0,0,0)
-    this.mesh.scale.x = data.width
-    this.mesh.scale.y = data.height
-    this.mesh.scale.z = data.length
+    data.width   /= 1000
+    data.height  /= 1000
+    data.length  /= 1000
+    this.mesh.scale.x = data.width ;
+    this.mesh.scale.y = data.height;
+    this.mesh.scale.z = data.length;
     this.mesh.position.set( data.width/2, data.height/2, data.length/2 );
   }
 
@@ -159,8 +206,6 @@ class Room {
   getMesh(){
     return this.scene
   }
-
-
 
   updateMaterials(){
     for (var i = 0; i < this.mesh.material.length; i++) {
@@ -281,7 +326,7 @@ class Room {
         that.editorBox.position.z = event.intersect.point.z
       }
     }, false)
-    
+
     this.domEvents.addEventListener(zAxisMesh, 'click', function(event){
       that.onTranslation = false
       that.axisHelperMeshes['x'].visible = false
@@ -307,7 +352,24 @@ class Room {
       'z': zAxisMesh,
     }
   }
+}
 
 
+function findObjectByTag(list, tag){
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].tag == tag) {
+      return list[i];
+    }
+  }
+  return false;
+}
 
+// change the scale of the data
+function correctData(data){
+  for (var key in data) {
+    if (typeof(data[key]) == 'number') {
+      data[key] /= 1000;
+    }
+  }
+  return data;
 }

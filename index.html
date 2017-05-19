@@ -119,6 +119,9 @@
               <label class="btn btn-default">
                 <input type="checkbox" id="grid-check" autocomplete="off"> <span class="glyphicon glyphicon-th-large"></span> Rejilla
               </label>
+              <label class="">
+                <input type="range" id="input-main-light" value="1" max="1" min="0" step="0.1">Intensidad de luz
+              </label>
             </div>
             <div class="btn-group pull-right">
                 <input type="color" id="edge-color" name="color" value="#ffffff"> Color de borde
@@ -219,19 +222,19 @@
 
                           <div class="col-lg-3">
                             <div class="input-group">
-                              <input id="input-room-width" type="integer" step="1" class="form-control" aria-label="..." placeholder="Ancho" value="3">
+                              <input id="input-room-width" type="integer" step="1" class="form-control" aria-label="..." placeholder="Ancho" value="3000">
                             </div><!-- /input-group -->
                           </div><!-- /.col-lg-6 -->
 
                           <div class="col-lg-3">
                             <div class="input-group">
-                              <input id="input-room-height" type="integer" step="1" class="form-control" aria-label="..." placeholder="Altura" value="2">
+                              <input id="input-room-height" type="integer" step="1" class="form-control" aria-label="..." placeholder="Altura" value="2000">
                             </div><!-- /input-group -->
                           </div><!-- /.col-lg-6 -->
 
                           <div class="col-lg-3">
                             <div class="input-group">
-                              <input id="input-room-length" type="integer" step="1" class="form-control" aria-label="..." placeholder="Largo" value="2">
+                              <input id="input-room-length" type="integer" step="1" class="form-control" aria-label="..." placeholder="Largo" value="2000">
                             </div><!-- /input-group -->
                           </div><!-- /.col-lg-6 -->
 
@@ -244,7 +247,6 @@
                         <h3 class="panel-title">Colores</h3>
                       </div>
                       <div class="panel-body">
-
                           <form class="form-horizontal">
                             <div class="form-group">
                               <label for="input-wall-color" class="col-sm-1 control-label">Murallas</label>
@@ -261,9 +263,9 @@
                               </div>
                             </div>
                           </form>
-
                       </div>
                     </div>
+
                     <div class="panel panel-default">
                       <div class="panel-heading">
                         <h3 class="panel-title">Luz</h3>
@@ -282,6 +284,43 @@
                             </div>
                           </form>
 
+                      </div>
+                    </div>
+
+
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Elementos</h3>
+                      </div>
+                      <div class="panel-body">
+                        <button id="btn-add-room-element" class="btn btn-default " type="button" name="button"><span class="glyphicon glyphicon-plus"></span></button>
+                        <table id="room-table" class="table">
+                          <thead>
+                            <tr class="static">
+                              <th class="col-sm-2" colspan="1">TAG</th>
+                              <th class="col-sm-2" colspan="1">Tipo</th>
+                              <th class="col-sm-3" colspan="3">Posición(X,Y,Z)</th>
+                              <th class="col-sm-3" colspan="3">Orientación(X,Y,Z)</th>
+                              <th class="col-sm-1">Visible</th>
+                              <th class="col-sm-1">Opciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr class="row-template static" style="display: none;">
+                              <td class="col-sm-2"><input type="text" value=""></td>
+                              <td class="col-sm-2"><input type="text" value=""></td>
+                              <td class="col-sm-1"><input type="number" value="1"></td>
+                              <td class="col-sm-1"><input type="number" value="1"></td>
+                              <td class="col-sm-1"><input type="number" value="1"></td>
+                              <td class="col-sm-1"><input type="number" value="1"></td>
+                              <td class="col-sm-1"><input type="number" value="1"></td>
+                              <td class="col-sm-1"><input type="number" value="1"></td>
+                              <td><input type="checkbox" name="visible" checked></td>
+                              <td><div class="btn-group" role="group"><button class="btn btn-default btn-remove-room-element"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
 

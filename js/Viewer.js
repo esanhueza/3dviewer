@@ -1,5 +1,8 @@
 var ViewerTool = {};
-
+var TEXTURES = {
+  "Fresno Negro Esc MDF": 'fresno_negro.jpg',
+  'nebraska' : 'nebraska.jpg'
+};
 class Viewer {
   constructor() {
     this.scene = new THREE.Scene();
@@ -9,7 +12,6 @@ class Viewer {
       preserveDrawingBuffer: true,
       antialiasing: true,
     });
-    //this.renderer.setPixelRatio( window.devicePixelRatio );
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
     this.grid = [];
@@ -21,12 +23,14 @@ class Viewer {
     this.autoRotate = false;
     this.fixCamera = false;
     this.pieceScale = 1;
+    this.textures = {};
     this.materials = {
-      'wood' : new THREE.MeshBasicMaterial( {
+      'wood' : new THREE.MeshPhongMaterial( {
         color: 0xffffff,
-        side: THREE.FrontSide,
+        side: THREE.DoubleSide,
         shading: THREE.FlatShading,
-      } ),
+        vertexColors: THREE.NoColors,
+      }),
       'wireframe' : new THREE.LineBasicMaterial({
         color: 0x000000,
         linewidth: 3,
@@ -60,10 +64,35 @@ class Viewer {
 
     this.room = null;
     this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+
+    this.mainLight = new THREE.AmbientLight( 0xffffff ); // soft white light
+    this.scene.add( this.mainLight );
+  }
+
+
+  setLightIntensity(value){
+    this.mainLight.intensity = value;
+  }
+  /*
+   * Load textures necesary to use on the pieces.
+   * parameters :
+   *    textures : array of texture names
+   */
+  loadTextures(textures){
+    for (var i = 0; i < textures.length; i++) {
+      if (TEXTURES[textures[i]] == undefined){
+          continue;
+      }
+      var filename = TEXTURES[textures[i]];
+      this.textures[textures[i]] = new THREE.TextureLoader().load( "assets/"+filename );
+      this.textures[textures[i]].wrapS = THREE.RepeatWrapping;
+      this.textures[textures[i]].wrapT = THREE.RepeatWrapping;
+    }
   }
 
   removeRoom(){
     this.scene.remove(this.room.getMesh())
+    this.room = null;
   }
 
   createRoom(w,h,l){
@@ -93,7 +122,6 @@ class Viewer {
       var model = this.createModel(data[i]);
       this.group.add(model);
     }
-    this.updatePivot();
   }
 
   findModelByTag(tag){
@@ -104,25 +132,28 @@ class Viewer {
       }
     }
     return false;
-
   }
+
+
   removeModel(data){
     var model = this.findModelByTag(data.tag);
     if (model){
       this.group.remove(model);
     }
-    this.updatePivot();
   }
+
   addModel(data){
+    // first make sure to load all the necessary textures
+    var texturesToLoad = this.extractTextures(data)
+    this.loadTextures(texturesToLoad)
+    // then create the model and add it to the scene
     var model = this.createModel(data);
     this.group.add(model);
-    this.updatePivot();
   }
 
   createModel(data){
     var group = new THREE.Group();
     group.tag = data.tag;
-    console.log("model created with tag: ", group.tag);
 
     // Creating meshes
     for (var i = 0; i < data.pieces.length; i++) {
@@ -138,16 +169,10 @@ class Viewer {
     return group;
   }
 
-  updatePivot(){
-    var box = new THREE.Box3();
-    box.setFromObject( this.group );
-    this.centerPivot.position.x = (box.max.x - box.min.x) / 2;
-    this.centerPivot.position.y = (box.max.y - box.min.y) / 2;
-    this.centerPivot.position.z = (box.max.z - box.min.z) / 2;
-  }
   rotate(r){
     this.centerPivot.rotation.y += r;
   }
+
   correctSize(data){
     var position;
     // rotate position Vector3
@@ -175,6 +200,7 @@ class Viewer {
     data.l = Math.abs(position.z/1000);
     return data;
   }
+
   createPiece(d){
     var data = this.correctSize(d);
     var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
@@ -183,7 +209,13 @@ class Viewer {
     var edges = new THREE.EdgesGeometry( geometry );
     var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
 
-    //var wireframe = new THREE.LineSegments( wireframeGeometry, this.materials['wireframe'] );
+
+    if (this.textures[d.texture] != undefined){
+      pieceMesh.material.map = this.textures[d.texture];
+    }
+    else{
+      pieceMesh.material.color.setHex(data.color);
+    }
 
     pieceMesh.position.x = data.x + data.w/2;
     pieceMesh.position.y = data.y + data.h/2;
@@ -195,7 +227,7 @@ class Viewer {
     wireframe.position.z = data.z + data.l/2;
 
     pieceMesh.tag = data.name;
-    pieceMesh.material.color.setHex(data.color);
+
     pieceMesh.pieceType = 'piece';
     wireframe.pieceType = 'wireframe';
     return {piece : pieceMesh, wireframe: wireframe};
@@ -221,7 +253,6 @@ class Viewer {
 
     model.add(result.piece);
     model.add(result.wireframe);
-    this.updatePivot();
   }
 
   updateModel(d){
@@ -336,8 +367,6 @@ class Viewer {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-
-
     callback()
   }
 
@@ -392,6 +421,19 @@ class Viewer {
     document.body.removeChild(result);
   }
 
+
+  updateRoomElement(data){
+    if (this.room){
+      this.room.updateObject(data);
+    }
+  }
+
+  removeRoomElement(data){
+    if (this.room) {
+      this.room.removeObject(data.tag);
+    }
+  }
+
   // Rotate an object around an arbitrary axis in world space
   rotateAroundWorldAxis(object, axis, radians) {
       var rotWorldMatrix = new THREE.Matrix4();
@@ -399,6 +441,24 @@ class Viewer {
       rotWorldMatrix.multiply(object.matrix);        // pre-multiply
       object.matrix = rotWorldMatrix;
       object.rotation.setFromRotationMatrix(object.matrix)
+  }
+
+  /*
+   * Search which textures must be loaded to create the pieces
+   * parameters :
+   *    data: pieces data
+   * return
+   *    toLoad: array of textures to load
+   */
+  extractTextures(data){
+    var toLoad = []
+    for (var i = 0; i < data.pieces.length; i++) {
+      if (data.pieces[i].texture != null && toLoad.indexOf(data.pieces[i].texture) == -1){
+          // should be a valid texture and must be not previously added to the lightIntensity
+          toLoad.push(data.pieces[i].texture)
+      }
+    }
+    return toLoad
   }
 }
 

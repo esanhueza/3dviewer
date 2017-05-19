@@ -31,7 +31,9 @@ var guidList = ['1Io9jL33nJIm5jZVzr5UtQTqny-1IRmnOLO2XK-ZOSjE',
                 '1yl8vGarnbzhXMBk_5vF7E2rZlQtw70E5WWec09x_5Pg',
                 '1VWGHCpsyJ-oMFnDxJnpp64BB5QBkix_ehJNFMD3u1H4',
                 '1G_dq8XNSpLsK5LgQAEfOLtvHuf4NpNU2LobW0JH6vLg',
-                '1omGhESDYyaz4cnay8W9Azk3brT6iePER9eCDuufZ48A'];
+                '1omGhESDYyaz4cnay8W9Azk3brT6iePER9eCDuufZ48A',
+                // '1FD2-3Rmwkb8aYej56V4Kx4_HNsFn5ttdmY5Nj8VAF9g'
+              ];
 
 
 
@@ -49,9 +51,11 @@ var materials = {};
 var selectedItemIndex;
 var items = document.getElementsByClassName("mesh-item");
 var form = document.getElementById("mesh-form");
-var table = $('#pieces-table');
+var piecesTable = $('#pieces-table');
 var modelsTable = $('#models-table');
+var roomTable   = $('#room-table');
 var filename;
+
 // Se crea el visor 3D
 var tool = ViewerTool.viewer;
 tool.init(viewerSection);
@@ -69,9 +73,6 @@ $('#piece-scale').on('change', function (){
 $('#rotate-check').on('change', function (){
     tool.toggleRotation(this.checked);
 });
-// $('#model-spreadsheet').on('change', function (){
-//   loadModel(this.value);
-// });
 
 $('#fixed-camera-check').on('change', function (){
     tool.toggleFixedCamera(this.checked);
@@ -106,12 +107,13 @@ $('#models-table tbody').on('click', '.btn-remove-model', function(){
   var guid = row.parent().attr('data-guid')
   tool.removeModel(guid)
 });
-$('#models-table tbody').on('click', '.btn-edit-model', function(){
-  console.log("btn-edit-model");
-});
 
 $('#btn-load').on('click', function(){
   loadModel([$("#model-spreadsheet")[0].value])
+});
+
+$('#input-main-light').on('change', function(evt){
+  tool.setLightIntensity($(evt.target).val());
 });
 
 $('#btn-load-all').on('click', function (){
@@ -134,9 +136,35 @@ $('#btn-create-room').on('click', function (){
   var l = $("#input-room-length").val()
   tool.createRoom(w,h,l)
 });
+
 $('#btn-remove-room').on('click', function (){
+  roomTable.find("tbody tr:not(.row-template)").remove();
   tool.removeRoom();
 });
+
+$('#btn-add-room-element').on('click', function (){
+  if (!tool.room){
+    $("#btn-create-room").trigger("click");
+  }
+  var template = roomTable.find(".row-template")[0];
+  var newRow = $(template).clone();
+  var tagInput = $($(newRow).find("td input")[0]);
+  newRow.removeClass("row-template");
+  newRow.show();
+  tagInput.val(stringGen(10));
+  roomTable.append(newRow);
+});
+
+$('#room-table').on('click', '.btn-remove-room-element, .btn-remove-room-element span', function (evt){
+  var parents = $(evt.target).parentsUntil("tbody");
+  var row = $(parents[parents.length-1]);
+  var t = $(row.children()[0]).find('input').val();
+  tool.removeRoomElement({tag:t});
+  row.remove();
+});
+
+$('#room-table').on('change', 'tbody tr td input, tbody tr td select', updateRoomElement);
+
 
 // room update events
 $('#input-room-width, #input-room-height, #input-room-length').on('change', function (){
@@ -229,7 +257,6 @@ function loadModel(modelsToLoad){
         $('#nav-'+tag).remove();
       }
     }
-
     $.get({
       modelGuid: guid,
       modelIndex: i,
@@ -243,18 +270,21 @@ function loadModel(modelsToLoad){
                        data[0].content.$t.split(', ')[8].split(':')[0];
         for (var i = 1; i < len; i++) {
           var obj = data[i].content.$t.split(', ')
+
           // ignore column 1, is empty
           if (obj.length >= 9){
+            var textureName = obj.length == 10 ? obj[9].split(': ')[1] : null;
             parsedData.push({
-              name: obj[0].split(':')[1],
-              l: parseFloat(obj[1].split(':')[1].replace(',', '.')),
-              w: parseFloat(obj[2].split(':')[1].replace(',', '.')),
-              h: parseFloat(obj[3].split(':')[1].replace(',', '.')),
-              orientation: parseInt(obj[4].split(':')[1]),
-              color: '0x' + obj[5].split(':')[1].replace(' ', ''),
-              y: parseFloat(obj[6].split(':')[1].replace(',', '.')),
-              x: parseFloat(obj[7].split(':')[1].replace(',', '.')),
-              z: parseFloat(obj[8].split(':')[1].replace(',', '.')),
+              name: obj[0].split(': ')[1],
+              l: parseFloat(obj[1].split(': ')[1].replace(',', '.')),
+              w: parseFloat(obj[2].split(': ')[1].replace(',', '.')),
+              h: parseFloat(obj[3].split(': ')[1].replace(',', '.')),
+              orientation: parseInt(obj[4].split(': ')[1]),
+              color: '0x' + obj[5].split(': ')[1].replace(' ', ''),
+              y: parseFloat(obj[6].split(': ')[1].replace(',', '.')),
+              x: parseFloat(obj[7].split(': ')[1].replace(',', '.')),
+              z: parseFloat(obj[8].split(': ')[1].replace(',', '.')),
+              texture: textureName,
             });
           }
           else{
@@ -263,10 +293,13 @@ function loadModel(modelsToLoad){
             }
           }
         }
+
+
         // se actualiza la informacion en el visor y en la tabla de piezas
 
-        var model = {guid:this.modelGuid, tag: "MOD" + (guidList.indexOf(this.modelGuid)+1), x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
+        var model = {guid:this.modelGuid, tag: "MOD" + (guidList.indexOf(this.modelGuid)+1), x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true, texture:null};
         addPiecesList(parsedData, model.tag);
+
         tool.addModel({tag: model.tag, pieces:parsedData});
         addModel(model);
 
@@ -329,6 +362,23 @@ function updateModel(evt){
   tool.updateModel(newData);
 }
 
+function updateRoomElement(evt){
+  var row = $(evt.target.parentElement.parentElement).children();
+  newData = {};
+  index = $(row[0]).html() - 1;
+  newData.tag = $(row[0]).find('input').val();
+  newData.type = $(row[1]).find('input').val();
+  newData.x = parseInt($(row[2]).find('input').val());
+  newData.y = parseInt($(row[3]).find('input').val());
+  newData.z = parseInt($(row[4]).find('input').val());
+  newData.rx = parseInt($(row[5]).find('input').val());
+  newData.ry = parseInt($(row[6]).find('input').val());
+  newData.rz = parseInt($(row[7]).find('input').val());
+  newData.visible = $(row[8]).find('input').is(':checked');
+  tool.updateRoomElement(newData);
+}
+
+
 function updatePiece(evt){
   var row = $(evt.target.parentElement.parentElement).children();
   newData = {};
@@ -344,15 +394,15 @@ function updatePiece(evt){
   var color = $(row[8]).find('input').val();
   newData.color = '0x' + color.replace(/[ #]/g, '');
   newData.orientation = parseInt($(row[9]).find('select').val());
-  var table = evt.target.parentElement.parentElement.parentElement.parentElement;
-  var tag = $(table).attr('id').split('-')[2];
+  var piecesTable = evt.target.parentElement.parentElement.parentElement.parentElement;
+  var tag = $(piecesTable).attr('id').split('-')[2];
   tool.updatePiece(tag, index, newData);
 }
 
 function addPiecesList(data, tag){
   $('#nav-models').append('<li id="nav-'+tag+'"role="presentation"><a href="#'+tag+'Tab" aria-controls="'+tag+'Tab" role="tab" data-toggle="tab">'+tag+'</a></li>')
   $('#tab-content-models').append('<div role="tabpanel" class="tab-pane" id="'+tag+'Tab"></div>')
-  var newTable = table.clone();
+  var newTable = piecesTable.clone();
   for (var i = 0; i < data.length; i++) {
     var html = '<tr>' +
         '<td>'+(i+1)+'</td><td><input type="text" size="10" maxlength="6" value="'+data[i].name+'"></td>'+
@@ -376,4 +426,16 @@ function addPiecesList(data, tag){
     newTable.attr('id', 'pieces-table-' + tag);
     newTable.show();
   }
+}
+
+function stringGen(len)
+{
+    var text = "";
+
+    var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < len; i++ )
+        text += charset.charAt(Math.floor(Math.random() * charset.length));
+    console.log(text);
+    return text;
 }
