@@ -305,10 +305,25 @@ function updateRoomElement(evt){
 
 /* extrae los datos del editor de piezas y lo envia al visor 3d para actualizar la pieza */
 function updatePiece(evt){
-  newData = getPieceEditorData();
+  var newData = getPieceEditorData();
+  updatePieceOnList(newData);
   tool.updatePiece(newData);
 }
 
+function updatePieceOnList(data){
+  var row = $('#pieces-table-' + data.modelId + ' tbody tr:nth-child('+(parseInt(data.index)+1)+') td');
+  $(row[2]).html(data.w);
+  $(row[3]).html(data.h);
+  $(row[4]).html(data.l);
+  $(row[5]).html(data.x);
+  $(row[6]).html(data.y);
+  $(row[7]).html(data.z);
+  $(row[8]).find('div').css('background', data.color.replace('0x', '#'));
+  $(row[8]).attr('data-color', data.color.replace('0x', '#'));
+  $(row[9]).html(orientationList[data.orientation]);
+  $(row[10]).html(data.visible ? 'visible' : 'oculto');
+  $(row[11]).html(data.texture ? data.texture.name : '');
+}
 
 // crea una nueva tabla para las piezas del modelo cargado
 function addPiecesList(data, modelId){
@@ -350,7 +365,8 @@ function getPieceEditorData(){
   data.y = parseInt($("#piece-editor-y").val());
   data.z = parseInt($("#piece-editor-z").val());
   data.visible = $("#piece-editor-visible").is(':checked');
-  data.texture = appData.textures[$("#piece-editor-texture option:selected").attr('data-index')];
+  var textureIndex = $("#piece-editor-texture option:selected").attr('data-index');
+  data.texture = textureIndex > 0 ? appData.textures[textureIndex] : undefined;
   var color = $("#piece-editor-color").val();
   data.color = '0x' + color.replace(/[ #]/g, '');
   data.orientation = parseInt($("#piece-editor-orientation").val());
@@ -373,7 +389,7 @@ function setPieceEditorData(evt){
   $("#piece-editor-orientation").val(orientationList.getKey($(row[9]).html()));
   $("#piece-editor-visible").prop('checked', $(row[10]).html() == 'visible');
   var texture = getTextureByName($(row[11]).html())
-  $("#piece-editor-texture").val(texture.src);
+  $("#piece-editor-texture").val(texture ? texture.src : '-1');
 }
 
 /* obtiene la informacion completa de la textura segun su nombre */
