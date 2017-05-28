@@ -1,8 +1,7 @@
 var ViewerTool = {};
-var TEXTURES = {
-  "Fresno Negro Esc MDF": 'fresno_negro.jpg',
-  'nebraska' : 'nebraska.jpg'
-};
+
+
+
 class Viewer {
   constructor() {
     this.scene = new THREE.Scene();
@@ -24,6 +23,7 @@ class Viewer {
     this.fixCamera = false;
     this.pieceScale = 1;
     this.textures = {};
+    this.roomObjects = [];
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xffffff,
@@ -45,7 +45,7 @@ class Viewer {
     var self = this;
   }
 
-  init(container){
+  init(container, textures, roomObjects){
     this.container = container;
     this.renderer.setSize( container.offsetWidth, container.offsetHeight );
     this.container.appendChild( this.renderer.domElement );
@@ -62,9 +62,9 @@ class Viewer {
     this.createGrid();
     render();
 
+
     this.room = null;
     this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
-
     this.mainLight = new THREE.AmbientLight( 0xffffff ); // soft white light
     this.scene.add( this.mainLight );
   }
@@ -76,18 +76,21 @@ class Viewer {
   /*
    * Load textures necesary to use on the pieces.
    * parameters :
-   *    textures : array of texture names
+   *    textures : array of texture's filenames
    */
   loadTextures(textures){
+    var loader = new THREE.TextureLoader();
+    loader.crossOrigin = '';
     for (var i = 0; i < textures.length; i++) {
-      if (TEXTURES[textures[i]] == undefined){
-          continue;
-      }
-      var filename = TEXTURES[textures[i]];
-      this.textures[textures[i]] = new THREE.TextureLoader().load( "assets/"+filename );
-      this.textures[textures[i]].wrapS = THREE.RepeatWrapping;
-      this.textures[textures[i]].wrapT = THREE.RepeatWrapping;
+      var texture = loader.load( textures[i].src );
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      this.textures[textures[i].name] = texture;
     }
+  }
+
+  setAvaliableObjects(objects){
+    this.objects = objects;
   }
 
   removeRoom(){
@@ -100,7 +103,9 @@ class Viewer {
       this.removeRoom()
     }
     this.room = new Room(w,h,l, this.domEvents);
+    this.room.avaliableObjects = this.objects;
     this.scene.add(this.room.getMesh());
+    return this.room;
   }
 
   updateRoom(data){
@@ -135,17 +140,14 @@ class Viewer {
   }
 
 
-  removeModel(data){
-    var model = this.findModelByTag(data.tag);
+  removeModel(tag){
+    var model = this.findModelByTag(tag);
     if (model){
       this.group.remove(model);
     }
   }
 
   addModel(data){
-    // first make sure to load all the necessary textures
-    var texturesToLoad = this.extractTextures(data)
-    this.loadTextures(texturesToLoad)
     // then create the model and add it to the scene
     var model = this.createModel(data);
     this.group.add(model);
@@ -209,13 +211,13 @@ class Viewer {
     var edges = new THREE.EdgesGeometry( geometry );
     var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
 
-
-    if (this.textures[d.texture] != undefined){
-      pieceMesh.material.map = this.textures[d.texture];
+    if (d.texture && this.textures[d.texture.name] != undefined){
+      pieceMesh.material.map = this.textures[d.texture.name];
     }
     else{
       pieceMesh.material.color.setHex(data.color);
     }
+
 
     pieceMesh.position.x = data.x + data.w/2;
     pieceMesh.position.y = data.y + data.h/2;
@@ -233,14 +235,13 @@ class Viewer {
     return {piece : pieceMesh, wireframe: wireframe};
   }
 
-  updatePiece(tag, index, data){
-    //this.meshes[index].parent.remove(this.meshes[index])
-    //this.wireframes[index].parent.remove(this.wireframes[index])
+  updatePiece(data){
     var result = this.createPiece(data);
-    var model  = this.findModelByTag(tag);
+    var model  = this.findModelByTag(data.modelId);
+    if (!model) return;
 
     for (var i = 0; i < model.children.length; i++) {
-      if (model.children[i].dataIndex == index){
+      if (model.children[i].dataIndex == data.index){
         model.remove(model.children[i]);
         model.remove(model.children[i]);
       }
@@ -248,8 +249,8 @@ class Viewer {
 
     result.piece.visible = data.visible;
     result.wireframe.visible = data.visible;
-    result.piece.dataIndex = index;
-    result.wireframe.dataIndex = index;
+    result.piece.dataIndex = data.index;
+    result.wireframe.dataIndex = data.index;
 
     model.add(result.piece);
     model.add(result.wireframe);
@@ -453,7 +454,7 @@ class Viewer {
   extractTextures(data){
     var toLoad = []
     for (var i = 0; i < data.pieces.length; i++) {
-      if (data.pieces[i].texture != null && toLoad.indexOf(data.pieces[i].texture) == -1){
+      if (data.pieces[i].texture != undefined && toLoad.indexOf(data.pieces[i].texture) == -1){
           // should be a valid texture and must be not previously added to the lightIntensity
           toLoad.push(data.pieces[i].texture)
       }

@@ -1,9 +1,22 @@
+#piece-editor-index{
+  display: none;
+}
 
+.color-box {
+  float: left;
+  width: 20px;
+  height: 20px;
+  margin: 5px;
+  border: 1px solid rgba(0, 0, 0, .2);
+}
 
 body, html, .container-fluid {
      height: 100%;
 }
 
+.col-hidden {
+  display: none;
+}
 
 input {display: block; padding: 0; margin: 0; border: 0; width: 100%;}
 td {margin: 0; padding: 0;}

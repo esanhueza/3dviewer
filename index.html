@@ -23,8 +23,6 @@
 
 
     <div class="container">
-    <br>
-
     <div class="row">
       <div class="col-xs-12 col-md-6">
         <div class="panel panel-default">
@@ -45,6 +43,10 @@
                   <div class="rect3"></div>
                   <div class="rect4"></div>
                   <div class="rect5"></div>
+                </div>
+                <div class="progress" id="bar-progress" style="display: none">
+                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                  </div>
                 </div>
 
                 <div class="col-xs-12 content">
@@ -159,7 +161,76 @@
 
                 <!-- Tab panes -->
                 <div class="tab-content">
+                  <br>
                   <div role="tabpanel" class="tab-pane active" id="piecesTab">
+                    <br>
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <span id="piece-editor-index"></span>
+                        <h4>
+                          <span id="piece-editor-model">Nombre modelo</span> -
+                          <span id="piece-editor-tag" >Tag pieza</span>
+                        </h4>
+                      </div>
+                      <div class="panel-body">
+                        <div class="row ">
+                          <div class="col-md-2 col-sm-2 col-xs-2">
+                              <span class="help-block text-muted small-font">Ancho</span>
+                              <input id="piece-editor-width" class="piece-editor-item" type="text" class="form-control" placeholder="Ancho">
+                          </div>
+                           <div class="col-md-2 col-sm-2 col-xs-2">
+                              <span class="help-block text-muted small-font">Espesor</span>
+                              <input class="piece-editor-item" id="piece-editor-height" type="text" class="form-control" placeholder="Espesor">
+                          </div>
+                          <div class="col-md-2 col-sm-2 col-xs-2">
+                              <span class="help-block text-muted small-font">Largo</span>
+                              <input class="piece-editor-item" id="piece-editor-length" type="text" class="form-control" placeholder="Largo">
+                          </div>
+                          <div class="col-md-2 col-sm-2 col-xs-2">
+                              <span class="help-block text-muted small-font">X</span>
+                              <input class="piece-editor-item" id="piece-editor-x" type="text" class="form-control" placeholder="X">
+                          </div>
+                           <div class="col-md-2 col-sm-2 col-xs-2">
+                                <span class="help-block text-muted small-font">Y</span>
+                                <input class="piece-editor-item" id="piece-editor-y" type="text" class="form-control" placeholder="Y">
+                            </div>
+                          <div class="col-md-2 col-sm-2 col-xs-2">
+                              <span class="help-block text-muted small-font">Z</span>
+                              <input class="piece-editor-item" id="piece-editor-z" type="text" class="form-control" placeholder="Z">
+                          </div>
+                        </div>
+                        <br>
+                        <div class="row ">
+                          <div class="col-md-1 col-sm-1 col-xs-1">
+                              <span class="help-block text-muted small-font">Visible</span>
+                              <input class="piece-editor-item" id="piece-editor-visible" type="checkbox" name="visible" checked>
+                          </div>
+                          <div class="col-md-1 col-sm-1 col-xs-1">
+                              <span class="help-block text-muted small-font">Color</span>
+                              <input class="piece-editor-item" id="piece-editor-color" type="color" class="form-control">
+                          </div>
+                          <div class="col-md-3 col-sm-3 col-xs-3">
+                            <div class="input-group">
+                              <span class="help-block text-muted small-font">Textura</span>
+                              <select class="form-control piece-editor-item" id="piece-editor-texture"></select>
+
+                            </div>
+                          </div>
+                          <div class="col-md-3 col-sm-3 col-xs-3">
+                            <div class="input-group">
+                              <span class="help-block text-muted small-font">Orientacion</span>
+                              <select class="piece-editor-item form-control" id="piece-editor-orientation">
+                                <option value="1"> Vertical de corte </option>
+                                <option value="2"> Horizontal de corte </option>
+                                <option value="3"> Vertical de frente </option>
+                                <option value="4"> Horizontal de frente </option>
+                              </select>
+
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <br>
                     <!-- Nav tabs -->
                     <ul id="nav-models" class="nav nav-tabs" role="tablist">
@@ -170,7 +241,6 @@
                     <div id="tab-content-models" class="tab-content">
 
                     </div>
-
 
                   </div>
                   <div role="tabpanel" class="tab-pane" id="modelsTab">
@@ -294,11 +364,19 @@
                         <h3 class="panel-title">Elementos</h3>
                       </div>
                       <div class="panel-body">
-                        <button id="btn-add-room-element" class="btn btn-default " type="button" name="button"><span class="glyphicon glyphicon-plus"></span></button>
+                        <div class="input-group col-xs-6">
+
+                          <select class="form-control" id="object-editor-select"></select>
+                          <span class="input-group-btn">
+                            <button id="btn-add-room-element" class="btn btn-default" type="button" name="button">
+                              <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                          </span>
+                        </div>
+                        <hr>
                         <table id="room-table" class="table">
                           <thead>
                             <tr class="static">
-                              <th class="col-sm-2" colspan="1">TAG</th>
                               <th class="col-sm-2" colspan="1">Tipo</th>
                               <th class="col-sm-3" colspan="3">Posición(X,Y,Z)</th>
                               <th class="col-sm-3" colspan="3">Orientación(X,Y,Z)</th>
@@ -308,8 +386,7 @@
                           </thead>
                           <tbody>
                             <tr class="row-template static" style="display: none;">
-                              <td class="col-sm-2"><input type="text" value=""></td>
-                              <td class="col-sm-2"><input type="text" value=""></td>
+                              <td class="col-sm-2"></td>
                               <td class="col-sm-1"><input type="number" value="1"></td>
                               <td class="col-sm-1"><input type="number" value="1"></td>
                               <td class="col-sm-1"><input type="number" value="1"></td>
@@ -338,7 +415,7 @@
    <!-- Hidden Content -->
    <div style="display: none">
 
-     <table id="pieces-table" class="table pieces-table" >
+     <table id="pieces-table" class="table table-hover" >
        <thead>
          <tr>
            <th class="col-md-1">#</th>
@@ -352,6 +429,7 @@
            <th class="col-md-1">Color</th>
            <th class="col-md-1">Orientación</th>
            <th class="col-md-1">Visible</th>
+           <th class="col-md-1">Textura</th>
          </tr>
        </thead>
        <tbody>
@@ -364,6 +442,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 		<script src="js/three.min.js"></script>
+		<script src="js/GoogleResourceManager.js"></script>
     <script src="js/gif.js"></script>
 		<script src="js/OBJExporter.js"></script>
 		<script src="js/OBJLoader.js"></script>
@@ -372,5 +451,10 @@
 		<script src="js/Room.js"></script>
 		<script src="js/Viewer.js"></script>
 		<script src="js/app.js"></script>
+		<script src="js/events.js"></script>
+    <!-- <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script> -->
   </body>
 </html>
