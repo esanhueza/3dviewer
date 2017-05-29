@@ -1,8 +1,8 @@
 class GoogleResourceManager {
   constructor() {
       this.files = {
-        // 'textures' : '13ub5jNXDlkXo0OKQi-IAr9g7XCeMVG8yd7ZZ8nsew6k',
-        'textures' : '1icTft9ixHugIwCAFmdeYR0FbgOUXly2frloirHYp9ms',
+        'textures' : '13ub5jNXDlkXo0OKQi-IAr9g7XCeMVG8yd7ZZ8nsew6k',
+        // 'textures' : '1icTft9ixHugIwCAFmdeYR0FbgOUXly2frloirHYp9ms',
       }
       this.onLoad = null;
   }

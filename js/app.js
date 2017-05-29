@@ -178,7 +178,7 @@ function loadModel(modelsToLoad){
         var len = response.feed.entry.length;
         var parsedData = [];
         var data = response.feed.entry;
-        filename = data[0].gsx$i.$t + "_" + data[0].gsx$j.$t + "_" + data[0].gsx$k.$t
+        filename = data[0].gsx$i.$t + "_" + data[0].gsx$j.$t + "_" + data[0].gsx$k.$t;
 
         for (var i = 2; i < data.length; i++) {
           var obj = data[i];
