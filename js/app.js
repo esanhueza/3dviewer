@@ -73,12 +73,12 @@ var tool = ViewerTool.viewer;
 tool.init(viewerSection);
 
 //loadList();
-fillModelsGuids();
 
 /*
  * inicializa la aplicacion cuando la informacion externa fue cargada
  */
 function initApp(){
+  fillModelsGuids();
   // obtiene las texturas disponibles
   var resourceManager = new GoogleResourceManager();
   resourceManager.getTextureList(function(texturesList){
@@ -90,6 +90,17 @@ function initApp(){
   appData['roomObjects'] = getRoomObjectsAvaliable();
   fillRoomObjectSelect( appData['roomObjects'] );
   tool.setAvaliableObjects( appData['roomObjects'] );
+
+  /* si un modelo es especificado en la URL, entonces se carga automaticamente. */
+  if (QueryString.model != undefined){
+
+    if (parseInt(QueryString.model) > guidList.length){
+      console.log("Modelo seleccionado no valido.");
+      return
+    }
+    currentGuid = guidList[QueryString.model-1];
+    loadModel([currentGuid]);
+  }
 }
 
 initApp();
@@ -118,18 +129,7 @@ function fillModelsGuids(){
   }
 }
 
-/* si un modelo es especificado en la URL, entonces se carga automaticamente. */
-function loadList(){
-  var select = $('#link-model-spreadsheet');
-  if (QueryString.model != undefined){
-    if (parseInt(QueryString.model) > guidList.length){
-      console.log("Modelo seleccionado no valido.");
-      return
-    }
-    console.log("Cargando modelo.");
-    currentGuid = guidList[QueryString.model-1];
-  }
-}
+
 
 function updateProgress(progress){
   $("#bar-progress .progress-bar").css("width", progress+"%");
@@ -178,12 +178,9 @@ function loadModel(modelsToLoad){
         var len = response.feed.entry.length;
         var parsedData = [];
         var data = response.feed.entry;
-        // filename = data[0].content.$t.split(', ')[6].split(':')[0] + ' ' +
-        //                data[0].content.$t.split(', ')[7].split(':')[0] + ':' +
-        //                data[0].content.$t.split(', ')[8].split(':')[0];
+        filename = data[0].gsx$i.$t + "_" + data[0].gsx$j.$t
 
         for (var i = 2; i < data.length; i++) {
-
           var obj = data[i];
           if (obj.gsx$b.$t.length == 0) continue;
           var pieceData = {
@@ -323,6 +320,7 @@ function updatePieceOnList(data){
   $(row[9]).html(orientationList[data.orientation]);
   $(row[10]).html(data.visible ? 'visible' : 'oculto');
   $(row[11]).html(data.texture ? data.texture.name : '');
+  $(row[12]).html(data.wireframe ? 'visible' : 'oculto');
 }
 
 // crea una nueva tabla para las piezas del modelo cargado
@@ -343,7 +341,8 @@ function addPiecesList(data, modelId){
         '<td data-color="'+data[i].color.replace('0x', '#')+'"><div class="color-box" style="background:'+data[i].color.replace('0x', '#')+'"></td>'+
         '<td>' + orientationList[data[i].orientation] + '</td>'+
         '<td>visible</td>' +
-        '<td>'+ (data[i].texture == undefined ? '' : data[i].texture.name);
+        '<td>'+ (data[i].texture == undefined ? '' : data[i].texture.name) + '</td>' +
+        '<td style="display:none">' + (data[i].texture == undefined ? 'visible' : 'oculto') + '</td>';
     html += '</td></tr>';
     $('#'+modelId+'Tab').append(newTable);
     newTable.find("tbody").append(html);
@@ -365,8 +364,9 @@ function getPieceEditorData(){
   data.y = parseInt($("#piece-editor-y").val());
   data.z = parseInt($("#piece-editor-z").val());
   data.visible = $("#piece-editor-visible").is(':checked');
+  data.wireframe = $("#piece-editor-wireframe-visible").is(':checked');
   var textureIndex = $("#piece-editor-texture option:selected").attr('data-index');
-  data.texture = textureIndex > 0 ? appData.textures[textureIndex] : undefined;
+  data.texture = textureIndex >= 0 ? appData.textures[textureIndex] : undefined;
   var color = $("#piece-editor-color").val();
   data.color = '0x' + color.replace(/[ #]/g, '');
   data.orientation = parseInt($("#piece-editor-orientation").val());
@@ -389,6 +389,7 @@ function setPieceEditorData(evt){
   $("#piece-editor-orientation").val(orientationList.getKey($(row[9]).html()));
   $("#piece-editor-visible").prop('checked', $(row[10]).html() == 'visible');
   var texture = getTextureByName($(row[11]).html())
+  $("#piece-editor-wireframe-visible").prop('checked', $(row[12]).html() == 'visible');
   $("#piece-editor-texture").val(texture ? texture.src : '-1');
 }
 

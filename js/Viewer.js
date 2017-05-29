@@ -213,6 +213,7 @@ class Viewer {
 
     if (d.texture && this.textures[d.texture.name] != undefined){
       pieceMesh.material.map = this.textures[d.texture.name];
+      wireframe.visible = false;
     }
     else{
       pieceMesh.material.color.setHex(data.color);
@@ -224,7 +225,7 @@ class Viewer {
     pieceMesh.position.z = data.z + data.l/2;
     pieceMesh.scale.set(this.pieceScale,this.pieceScale,this.pieceScale);
 
-    wireframe.position.x = data.x + data.w/2 ;
+    wireframe.position.x = data.x + data.w/2;
     wireframe.position.y = data.y + data.h/2;
     wireframe.position.z = data.z + data.l/2;
 
@@ -248,7 +249,7 @@ class Viewer {
     }
 
     result.piece.visible = data.visible;
-    result.wireframe.visible = data.visible;
+    result.wireframe.visible = data.visible && data.wireframe;
     result.piece.dataIndex = data.index;
     result.wireframe.dataIndex = data.index;
 
