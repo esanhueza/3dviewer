@@ -342,7 +342,7 @@ function addPiecesList(data, modelId){
         '<td>' + orientationList[data[i].orientation] + '</td>'+
         '<td>visible</td>' +
         '<td>'+ (data[i].texture == undefined ? '' : data[i].texture.name) + '</td>' +
-        '<td style="display:none">' + (data[i].texture == undefined ? 'visible' : 'oculto') + '</td>';
+        '<td style="display:none">visible</td>';
     html += '</td></tr>';
     $('#'+modelId+'Tab').append(newTable);
     newTable.find("tbody").append(html);

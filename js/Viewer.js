@@ -213,12 +213,12 @@ class Viewer {
 
     if (d.texture && this.textures[d.texture.name] != undefined){
       pieceMesh.material.map = this.textures[d.texture.name];
-      wireframe.visible = false;
     }
     else{
       pieceMesh.material.color.setHex(data.color);
     }
 
+    wireframe.visible = data.wireframe;
 
     pieceMesh.position.x = data.x + data.w/2;
     pieceMesh.position.y = data.y + data.h/2;
