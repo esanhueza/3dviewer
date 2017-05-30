@@ -65,22 +65,25 @@ var modelsTable = $('#models-table');
 var roomTable   = $('#room-table');
 var filename;
 var appData = {};
-var resourceManager = null;
+var resourceManager = new GoogleResourceManager();
 
 
 // Se crea el visor 3D
 var tool = ViewerTool.viewer;
 tool.init(viewerSection);
 
-//loadList();
 
+function initGoogleApi(){
+  gapi.load('client:auth2', function(){
+    resourceManager.initClient();
+  });
+}
 /*
  * inicializa la aplicacion cuando la informacion externa fue cargada
  */
 function initApp(){
   fillModelsGuids();
   // obtiene las texturas disponibles
-  var resourceManager = new GoogleResourceManager();
   resourceManager.getTextureList(function(texturesList){
     appData.textures = texturesList;
     tool.loadTextures(texturesList);
@@ -93,7 +96,6 @@ function initApp(){
 
   /* si un modelo es especificado en la URL, entonces se carga automaticamente. */
   if (QueryString.model != undefined){
-
     if (parseInt(QueryString.model) > guidList.length){
       console.log("Modelo seleccionado no valido.");
       return
@@ -105,21 +107,6 @@ function initApp(){
 
 initApp();
 
-
-/**
- *  On load, called to load the auth2 library and API client library.
- */
-  // function handleClientLoad() {
-  //
-  // gapi.load('client:auth2', function(){
-  //   var clientId = '498953387759-q8ehh29573e69rj3hbv99ofuma3ue6mn.apps.googleusercontent.com';
-  //   resourceManager = new GoogleResourceManager(clientId);
-  //   resourceManager.onLoad = function(){
-  //     //initApp();
-  //   }
-  //   resourceManager.initClient();
-  // });
-  // }
 
 /* rellena el elemento select para indicar que modelo se debe cargar al presionar el boton de cargar. */
 function fillModelsGuids(){

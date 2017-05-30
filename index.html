@@ -59,37 +59,79 @@
                       </span>
                   </div><!-- /input-group -->
                   <br>
+                  <!-- Load Button -->
+                  <div class="btn-group btn-group">
+                    <button id="btn-load-all" type="button" class="btn btn-default" name="button">Cargar todos</button>
+                  </div>
+
                   <div class="pull-right">
-                    <!-- Load Button -->
-                    <div class="btn-group btn-group">
-                      <button id="btn-load-all" type="button" class="btn btn-default" name="button">Cargar todos</button>
-                    </div>
-                    <!-- Export Button -->
-                    <div class="btn-group">
-                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Exportar <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a href="#" id="btn-export">
-                            <span class="glyphicon glyphicon-floppy-save"></span>
-                            Exportar modelo
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#" id="btn-export-gif">
-                            <span class="glyphicon glyphicon-facetime-video"></span>
-                            Exportar GIF
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#" id="btn-export-img">
-                            <span class="glyphicon glyphicon-picture"></span>
-                            Exportar IMG
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
+                      <!-- Export Button -->
+                      <div class="btn-group">
+
+                        <button id="btn-dropdown-google" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Google Drive<span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li>
+                            <a id="authorize-button" href="#">
+                              <span class="glyphicon glyphicon-user"></span>
+                              Iniciar sesión
+                            </a>
+                          </li>
+                          <li>
+                            <a id="signout-button" href="#">
+                              <span class="glyphicon glyphicon-user"></span>
+                              Cerrar sesión
+                            </a>
+                          </li>
+                          <li class="dropdown-google-item divider" role="separator"></li>
+                          <li class="dropdown-google-item">
+                            <a href="#" id="btn-google-export">
+                              <span class="glyphicon glyphicon-floppy-save"></span>
+                              Exportar modelo
+                            </a>
+                          </li>
+                          <li class="dropdown-google-item">
+                            <a href="#" id="btn-google-export-gif">
+                              <span class="glyphicon glyphicon-facetime-video"></span>
+                              Exportar GIF
+                            </a>
+                          </li>
+                          <li class="dropdown-google-item">
+                            <a href="#" id="btn-google-export-img">
+                              <span class="glyphicon glyphicon-picture"></span>
+                              Exportar IMG
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <!-- Boton exportar a pc -->
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          Exportar <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li>
+                            <a href="#" id="btn-export">
+                              <span class="glyphicon glyphicon-floppy-save"></span>
+                              Exportar modelo
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#" id="btn-export-gif">
+                              <span class="glyphicon glyphicon-facetime-video"></span>
+                              Exportar GIF
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#" id="btn-export-img">
+                              <span class="glyphicon glyphicon-picture"></span>
+                              Exportar IMG
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
                   </div>
                 </div>
 
@@ -448,6 +490,9 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 		<script src="js/three.min.js"></script>
+    <script defer async src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};initGoogleApi();"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
 		<script src="js/GoogleResourceManager.js"></script>
     <script src="js/gif.js"></script>
 		<script src="js/OBJExporter.js"></script>
@@ -458,9 +503,5 @@
 		<script src="js/Viewer.js"></script>
 		<script src="js/app.js"></script>
 		<script src="js/events.js"></script>
-    <!-- <script async defer src="https://apis.google.com/js/api.js"
-      onload="this.onload=function(){};handleClientLoad()"
-      onreadystatechange="if (this.readyState === 'complete') this.onload()">
-    </script> -->
   </body>
 </html>

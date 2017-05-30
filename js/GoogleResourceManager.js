@@ -1,10 +1,17 @@
 class GoogleResourceManager {
   constructor() {
+      this.clientId = "498953387759-q8ehh29573e69rj3hbv99ofuma3ue6mn.apps.googleusercontent.com";
+      this.scopes = 'https://www.googleapis.com/auth/drive';
+      this.discoveryDocs = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
       this.files = {
         'textures' : '13ub5jNXDlkXo0OKQi-IAr9g7XCeMVG8yd7ZZ8nsew6k',
         // 'textures' : '1icTft9ixHugIwCAFmdeYR0FbgOUXly2frloirHYp9ms',
       }
+      this.initialized = false;
       this.onLoad = null;
+      this.authorizeButton = $('#authorize-button');
+      this.signoutButton = $('#signout-button');
+      this.dropdownItems = $('.dropdown-google-item');
   }
 
   /**
@@ -18,20 +25,86 @@ class GoogleResourceManager {
       clientId: this.clientId,
       scope: this.scopes
     }).then(function () {
-      // Listen for sign-in state changes.
-      //gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-
       // Handle the initial sign-in state.
-      //updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-      //authorizeButton.onclick = handleAuthClick;
-      //signoutButton.onclick = handleSignoutClick;
-      gapi.auth2.getAuthInstance().signIn()
-      .then(function(){
-          //that.onLoad();
-
-        });
+      that.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+      that.authorizeButton.on('click', function(evt){
+        that.handleAuthClick(evt);
+      });
+      that.signoutButton.on('click', function(evt){
+        that.handleSignoutClick(evt);
+      });
     });
   }
+
+  /**
+   *  Called when the signed in status changes, to update the UI
+   *  appropriately. After a sign-in, the API is called.
+   */
+  updateSigninStatus(isSignedIn) {
+    if (isSignedIn) {
+      this.authorizeButton.hide();
+      this.signoutButton.show();
+      this.dropdownItems.show();
+    } else {
+      this.authorizeButton.show();
+      this.signoutButton.hide();
+      this.dropdownItems.hide();
+    }
+  }
+
+  /**
+   *  Sign in the user upon button click.
+   */
+  handleAuthClick(event) {
+    gapi.auth2.getAuthInstance().signIn();
+    this.updateSigninStatus(true);
+  }
+
+  /**
+   *  Sign out the user upon button click.
+   */
+  handleSignoutClick(event) {
+    gapi.auth2.getAuthInstance().signOut();
+    this.updateSigninStatus(false);
+  }
+
+  uploadImg(filename, contentType, file){
+    file = file.replace(/^data:.*;base64,/, "")
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+    var metadata = {
+      'title': filename,
+      'mimeType': contentType
+    };
+
+    var multipartRequestBody =
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' + contentType + '\r\n' +
+        'Content-Transfer-Encoding: base64\r\n' +
+        '\r\n' +
+        file +
+        close_delim;
+
+
+    var request = gapi.client.request({
+      'path': '/upload/drive/v2/files',
+      'method': 'POST',
+      'params': {'uploadType': 'multipart'},
+        'headers': {
+          'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+        },
+       'body': multipartRequestBody});
+
+    request.then(function(resp){
+      console.log(resp);
+    });
+  }
+
+
 
   /*
    * get the names, filenames and ids of the avaliable textures
@@ -161,4 +234,27 @@ class GoogleResourceManager {
     }
     return result; //JavaScript object
     //return JSON.stringify(result); //JSON
-  }
+}
+function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+
+  var blob = new Blob(byteArrays, {type: contentType});
+  return blob;
+}

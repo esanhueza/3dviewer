@@ -31,8 +31,24 @@ $('#btn-export').on('click', function(){
 });
 
 $('#btn-export-img').on('click', function(){
-  tool.exportIMG.call(tool, filename);
+  var img = tool.exportIMG.call(tool, filename);
+  // resourceManager.uploadImg(filename, 'image/jpeg', img);
 });
+$('#btn-google-export-img').on('click', function(){
+  var img = tool.getCurrentIMG.call(tool);
+  resourceManager.uploadImg(filename, 'image/jpeg', img);
+});
+$('#btn-google-export-gif').on('click', function(){
+  tool.getCurrentGIF.call(tool, function(blob){
+     var reader = new window.FileReader();
+     reader.readAsDataURL(blob);
+     reader.onloadend = function() {
+     base64data = reader.result;
+     resourceManager.uploadImg(filename, 'image/gif', base64data);
+   }
+  });
+});
+
 
 
 $('.piece-editor-item').on('change', updatePiece);
@@ -64,11 +80,9 @@ $('#btn-load-all').on('click', function (){
 });
 
 $('#btn-export-gif').on('click', function(){
-  $("#models-load-tab .spinner").show();
-  $("#models-load-tab .content").hide();
+  updateProgress(0);
   tool.exportGIF.call(tool, filename, function(){
-    $("#models-load-tab .spinner").hide();
-    $("#models-load-tab .content").show();
+    updateProgress(100);
   });
 });
 

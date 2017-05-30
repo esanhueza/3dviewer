@@ -414,15 +414,45 @@ class Viewer {
   }
 
   exportIMG(filename){
+    var img = this.renderer.domElement.toDataURL('image/jpeg');
     var result = document.createElement('a');
-    result.setAttribute('href',  this.renderer.domElement.toDataURL('image/jpeg'));
+    result.setAttribute('href',  img);
     result.setAttribute('download', filename + '.jpeg') ;
     result.style.display = 'none';
     document.body.appendChild(result);
     result.click();
     document.body.removeChild(result);
+    return img;
   }
 
+  getCurrentIMG(){
+    return this.renderer.domElement.toDataURL('image/jpeg');
+  }
+
+  getCurrentGIF(callback){
+    var steps = 8;
+    var exporter = new GIF({
+      workers: 2,
+      quality: 10,
+      workerScript: 'js/gif.worker.js'
+    });
+    this.centerPivot.rotation.y = 0;
+    for (var i = 0; i < steps; i++) {
+      var element = document.createElement('img');
+      this.rotate( i == 0 ? 0 : (45 * Math.PI / 180));
+    	viewer.renderer.render( this.scene, this.camera );
+      element.src = this.renderer.domElement.toDataURL('image/jpeg');
+      exporter.addFrame(element);
+    }
+
+    exporter.on('finished', function(blob) {
+      console.log(blob);
+      if (callback) {
+        callback(blob);
+      }
+    });
+    exporter.render();
+  }
 
   updateRoomElement(data){
     if (this.room){
