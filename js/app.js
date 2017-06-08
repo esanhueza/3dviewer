@@ -1,3 +1,5 @@
+
+
 var QueryString = function () {
   // This function is anonymous, is executed immediately and
   // the return value is assigned to QueryString!
@@ -85,15 +87,21 @@ function initApp(){
   fillModelsGuids();
   // obtiene las texturas disponibles
   resourceManager.getTextureList(function(texturesList){
+    console.log(texturesList);
     appData.textures = texturesList;
     tool.loadTextures(texturesList);
     // rellena select de textura en el editor de pieza
     fillTextureSelect(texturesList);
+    loadDefaultModel();
   });
   appData['roomObjects'] = getRoomObjectsAvaliable();
   fillRoomObjectSelect( appData['roomObjects'] );
   tool.setAvaliableObjects( appData['roomObjects'] );
+}
 
+initApp();
+
+function loadDefaultModel(){
   /* si un modelo es especificado en la URL, entonces se carga automaticamente. */
   if (QueryString.model != undefined){
     if (parseInt(QueryString.model) > guidList.length){
@@ -104,10 +112,6 @@ function initApp(){
     loadModel([currentGuid]);
   }
 }
-
-initApp();
-
-
 /* rellena el elemento select para indicar que modelo se debe cargar al presionar el boton de cargar. */
 function fillModelsGuids(){
   for (var i = 1; i <= guidList.length; i++) {

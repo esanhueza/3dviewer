@@ -9,7 +9,7 @@ class Viewer {
     this.domEvents	= null;
     this.renderer = new THREE.WebGLRenderer({
       preserveDrawingBuffer: true,
-      antialiasing: true,
+      antialias: true,
     });
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
@@ -27,9 +27,10 @@ class Viewer {
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xffffff,
-        side: THREE.DoubleSide,
+        side: THREE.FrontSide,
         shading: THREE.FlatShading,
         vertexColors: THREE.NoColors,
+        reflectivity: .8,
       }),
       'wireframe' : new THREE.LineBasicMaterial({
         color: 0x000000,
@@ -87,6 +88,7 @@ class Viewer {
       texture.wrapT = THREE.RepeatWrapping;
       this.textures[textures[i].name] = texture;
     }
+
   }
 
   setAvaliableObjects(objects){
@@ -207,12 +209,63 @@ class Viewer {
     var data = this.correctSize(d);
     var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
 
+    // 900x1600 -> 1024x2048, 768x1024mm
+    var tw = 768;
+    var th = 1024;
+
+    geometry.faceVertexUvs[0][8][0].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][8][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][9][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][8][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][9][1].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][9][2].x = data.w * 1000 / tw;
+
+    geometry.faceVertexUvs[0][10][0].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][10][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][10][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][11][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][11][1].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][11][2].x = data.w * 1000 / tw;
+
+
+    geometry.faceVertexUvs[0][4][0].y = data.l * 1000 / th;
+    geometry.faceVertexUvs[0][4][2].y = data.l * 1000 / th;
+    geometry.faceVertexUvs[0][4][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][5][2].y = data.l * 1000 / th;
+    geometry.faceVertexUvs[0][5][1].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][5][2].x = data.w * 1000 / tw;
+
+    geometry.faceVertexUvs[0][6][0].y = data.l * 1000 / th;
+    geometry.faceVertexUvs[0][6][2].y = data.l * 1000 / th;
+    geometry.faceVertexUvs[0][6][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][7][2].y = data.l * 1000 / th;
+    geometry.faceVertexUvs[0][7][1].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][7][2].x = data.w * 1000 / tw;
+
+
+    geometry.faceVertexUvs[0][0][0].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][0][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][0][2].x = data.l * 1000 / tw;
+    geometry.faceVertexUvs[0][1][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][1][1].x = data.l * 1000 / tw;
+    geometry.faceVertexUvs[0][1][2].x = data.l * 1000 / tw;
+
+    geometry.faceVertexUvs[0][2][0].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][2][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][2][2].x = data.l * 1000 / tw;
+    geometry.faceVertexUvs[0][3][2].y = data.h * 1000 / th;
+    geometry.faceVertexUvs[0][3][1].x = data.l * 1000 / tw;
+    geometry.faceVertexUvs[0][3][2].x = data.l * 1000 / tw;
+
+
+
     var pieceMesh = new THREE.Mesh(geometry, this.materials['wood'].clone());
     var edges = new THREE.EdgesGeometry( geometry );
     var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
 
     if (d.texture && this.textures[d.texture.name] != undefined){
       pieceMesh.material.map = this.textures[d.texture.name];
+
     }
     else{
       pieceMesh.material.color.setHex(data.color);
@@ -384,7 +437,13 @@ class Viewer {
   }
 
 
-  exportGIF(filename, callback){
+  exportGIF(filename, onProgress){
+    if (location.origin == 'file://'){
+      console.info("Creando GIF con metodo alternativo.");
+      this.exportGIF2(filename, onProgress);
+      return;
+    }
+    console.info("Creando GIF con metodo principal.");
     var steps = 8;
     var exporter = new GIF({
       workers: 2,
@@ -408,9 +467,70 @@ class Viewer {
       document.body.appendChild(result);
       result.click();
       document.body.removeChild(result);
-      callback()
+      onProgress(steps, steps);
     });
     exporter.render();
+  }
+
+  exportGIF2(filename, onProgress){
+    var that = this;
+		var current = 0;
+		var total = 8;
+		var canvas = document.createElement( 'canvas' );
+		canvas.width = that.renderer.domElement.width;
+		canvas.height = that.renderer.domElement.height;
+		var context = canvas.getContext( '2d' );
+		var buffer = new Uint8Array( canvas.width * canvas.height * total * 5 );
+		var gif = new GifWriter( buffer, canvas.width, canvas.height, { loop: 0 } );
+		var pixels = new Uint8Array( canvas.width * canvas.height );
+		var addFrame = function () {
+      that.rotate( current == 0 ? 0 : (45 * Math.PI / 180));
+			context.drawImage( that.renderer.domElement, 0, 0 );
+			var data = context.getImageData( 0, 0, canvas.width, canvas.height ).data;
+			var palette = [];
+			for ( var j = 0, k = 0, jl = data.length; j < jl; j += 4, k ++ ) {
+				var r = Math.floor( data[ j + 0 ] * 0.1 ) * 10;
+				var g = Math.floor( data[ j + 1 ] * 0.1 ) * 10;
+				var b = Math.floor( data[ j + 2 ] * 0.1 ) * 10;
+				var color = r << 16 | g << 8 | b << 0;
+				var index = palette.indexOf( color );
+				if ( index === -1 ) {
+					pixels[ k ] = palette.length;
+					palette.push( color );
+				} else {
+					pixels[ k ] = index;
+				}
+			}
+			// force palette to be power of 2
+			var powof2 = 1;
+			while ( powof2 < palette.length ) powof2 <<= 1;
+      palette.length = powof2;
+			gif.addFrame( 0, 0, canvas.width, canvas.height, pixels, { palette: new Uint32Array( palette ), delay: 100 } );
+			current ++;
+			if ( current < total ) {
+				setTimeout( addFrame, 0 );
+			} else {
+				setTimeout( finish, 0 );
+			}
+      onProgress(total, current);
+		}
+
+		var finish = function () {
+			var string = '';
+			for ( var i = 0, l = gif.end(); i < l; i ++ ) {
+				string += String.fromCharCode( buffer[ i ] )
+			}
+
+      var result = document.createElement('a');
+      result.setAttribute('href', 'data:image/gif;base64,' + btoa( string )) ;
+      result.setAttribute('download', filename + '.gif') ;
+      result.style.display = 'none';
+      document.body.appendChild(result);
+      result.click();
+      document.body.removeChild(result);
+      onProgress(total, total);
+		}
+		addFrame();
   }
 
   exportIMG(filename){
@@ -446,7 +566,6 @@ class Viewer {
     }
 
     exporter.on('finished', function(blob) {
-      console.log(blob);
       if (callback) {
         callback(blob);
       }

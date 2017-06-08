@@ -81,8 +81,8 @@ $('#btn-load-all').on('click', function (){
 
 $('#btn-export-gif').on('click', function(){
   updateProgress(0);
-  tool.exportGIF.call(tool, filename, function(){
-    updateProgress(100);
+  tool.exportGIF.call(tool, filename, function(total, current){
+    updateProgress(current/total*100);
   });
 });
 
