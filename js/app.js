@@ -87,7 +87,6 @@ function initApp(){
   fillModelsGuids();
   // obtiene las texturas disponibles
   resourceManager.getTextureList(function(texturesList){
-    console.log(texturesList);
     appData.textures = texturesList;
     tool.loadTextures(texturesList);
     // rellena select de textura en el editor de pieza

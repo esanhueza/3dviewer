@@ -91,7 +91,9 @@ $('#btn-create-room').on('click', function (){
   var w = $("#input-room-width").val()
   var h = $("#input-room-height").val()
   var l = $("#input-room-length").val()
-  tool.createRoom(w,h,l)
+  tool.createRoom(w,h,l,{
+    clean: ''
+  })
   $("#input-main-light").val(0.5);
   $("#input-main-light").trigger('change');
 
@@ -115,7 +117,6 @@ $('#btn-add-room-element').on('click', function (){
   typeInput.html($("#object-editor-select").val());
   roomTable.append(newRow);
   $('#room-table tbody tr:last td:nth-child(2) input').trigger('change');
-  console.log($('#room-table tbody tr:last td:nth-child(2) input'));
 
 });
 

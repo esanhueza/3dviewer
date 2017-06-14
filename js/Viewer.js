@@ -1,12 +1,9 @@
 var ViewerTool = {};
 
-
-
 class Viewer {
   constructor() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color( 0xf2f2f2 );
-    this.domEvents	= null;
     this.renderer = new THREE.WebGLRenderer({
       preserveDrawingBuffer: true,
       antialias: true,
@@ -24,6 +21,7 @@ class Viewer {
     this.pieceScale = 1;
     this.textures = {};
     this.roomObjects = [];
+    this.textureSize = {width: 768, height:1024}
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xffffff,
@@ -51,7 +49,6 @@ class Viewer {
     this.renderer.setSize( container.offsetWidth, container.offsetHeight );
     this.container.appendChild( this.renderer.domElement );
     this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.2, 20 );
-    this.domEvents = new THREEx.DomEvents(this.camera, this.renderer.domElement)
     // Set camera position
     this.camera.position.y = 6;
     this.camera.position.z = 8;
@@ -104,7 +101,7 @@ class Viewer {
     if (this.room){
       this.removeRoom()
     }
-    this.room = new Room(w,h,l, this.domEvents);
+    this.room = new Room(w,h,l);
     this.room.avaliableObjects = this.objects;
     this.scene.add(this.room.getMesh());
     return this.room;
@@ -209,54 +206,48 @@ class Viewer {
     var data = this.correctSize(d);
     var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
 
-    // 900x1600 -> 1024x2048, 768x1024mm
-    var tw = 768;
-    var th = 1024;
+    geometry.faceVertexUvs[0][8][0].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][8][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][9][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][8][2].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][9][1].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][9][2].x = data.w * 1000 / this.textureSize.width;
 
-    geometry.faceVertexUvs[0][8][0].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][8][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][9][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][8][2].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][9][1].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][9][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][10][0].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][10][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][10][2].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][11][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][11][1].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][11][2].x = data.w * 1000 / this.textureSize.width;
 
-    geometry.faceVertexUvs[0][10][0].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][10][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][10][2].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][11][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][11][1].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][11][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][4][0].y = data.l * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][4][2].y = data.l * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][4][2].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][5][2].y = data.l * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][5][1].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][5][2].x = data.w * 1000 / this.textureSize.width;
 
-
-    geometry.faceVertexUvs[0][4][0].y = data.l * 1000 / th;
-    geometry.faceVertexUvs[0][4][2].y = data.l * 1000 / th;
-    geometry.faceVertexUvs[0][4][2].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][5][2].y = data.l * 1000 / th;
-    geometry.faceVertexUvs[0][5][1].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][5][2].x = data.w * 1000 / tw;
-
-    geometry.faceVertexUvs[0][6][0].y = data.l * 1000 / th;
-    geometry.faceVertexUvs[0][6][2].y = data.l * 1000 / th;
-    geometry.faceVertexUvs[0][6][2].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][7][2].y = data.l * 1000 / th;
-    geometry.faceVertexUvs[0][7][1].x = data.w * 1000 / tw;
-    geometry.faceVertexUvs[0][7][2].x = data.w * 1000 / tw;
+    geometry.faceVertexUvs[0][6][0].y = data.l * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][6][2].y = data.l * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][6][2].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][7][2].y = data.l * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][7][1].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][7][2].x = data.w * 1000 / this.textureSize.width;
 
 
-    geometry.faceVertexUvs[0][0][0].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][0][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][0][2].x = data.l * 1000 / tw;
-    geometry.faceVertexUvs[0][1][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][1][1].x = data.l * 1000 / tw;
-    geometry.faceVertexUvs[0][1][2].x = data.l * 1000 / tw;
+    geometry.faceVertexUvs[0][0][0].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][0][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][0][2].x = data.l * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][1][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][1][1].x = data.l * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][1][2].x = data.l * 1000 / this.textureSize.width;
 
-    geometry.faceVertexUvs[0][2][0].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][2][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][2][2].x = data.l * 1000 / tw;
-    geometry.faceVertexUvs[0][3][2].y = data.h * 1000 / th;
-    geometry.faceVertexUvs[0][3][1].x = data.l * 1000 / tw;
-    geometry.faceVertexUvs[0][3][2].x = data.l * 1000 / tw;
-
+    geometry.faceVertexUvs[0][2][0].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][2][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][2][2].x = data.l * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][3][2].y = data.h * 1000 / this.textureSize.height;
+    geometry.faceVertexUvs[0][3][1].x = data.l * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][3][2].x = data.l * 1000 / this.textureSize.width;
 
 
     var pieceMesh = new THREE.Mesh(geometry, this.materials['wood'].clone());
@@ -265,7 +256,6 @@ class Viewer {
 
     if (d.texture && this.textures[d.texture.name] != undefined){
       pieceMesh.material.map = this.textures[d.texture.name];
-
     }
     else{
       pieceMesh.material.color.setHex(data.color);
