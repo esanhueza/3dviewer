@@ -402,8 +402,6 @@ class Viewer {
   // create obj file with the meshes
   exportToObj(filename, callback){
     var exporter = new THREE.OBJExporter();
-
-
 		var result = exporter.parse(this.group);
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
@@ -413,6 +411,13 @@ class Viewer {
     element.click();
     document.body.removeChild(element);
     callback()
+  }
+
+  // create obj file with the meshes
+  getCurrentObj(filename, callback){
+    var exporter = new THREE.OBJExporter();
+		var result = exporter.parse(this.group);
+    return result;
   }
 
   togglePiecesVisibility(v){

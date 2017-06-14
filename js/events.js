@@ -30,9 +30,14 @@ $('#btn-export').on('click', function(){
   });
 });
 
+$('#btn-google-export').on('click', function(){
+  var obj = tool.getCurrentObj.call(tool);
+  resourceManager.uploadObj(filename, obj);
+});
+
 $('#btn-export-img').on('click', function(){
   var img = tool.exportIMG.call(tool, filename);
-  // resourceManager.uploadImg(filename, 'image/jpeg', img);
+  // resourceManager.uploadFile(filename, 'image/jpeg', img);
 });
 $('#btn-google-export-img').on('click', function(){
   var img = tool.getCurrentIMG.call(tool);
