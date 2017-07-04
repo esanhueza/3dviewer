@@ -1,23 +1,26 @@
 
 
 class Room {
-  constructor(w, h, l) {
+  constructor(w, h, l, params) {
+    this.options = params;
     this.avaliableObjects = [];
     this.scene = new THREE.Group();
+    this.scene.scale.set(0.001, 0.001, 0.001);
     this.objects = [];
+    console.log(this.options.wallColor);
     this.materials = {
       'wall': new THREE.MeshPhongMaterial( {
-        color: 0xaaaaaa,
+        color: this.options.wallColor || 0xaaaaaa,
         side: THREE.BackSide,
         shading: THREE.FlatShading
       }),
       'ceil': new THREE.MeshPhongMaterial( {
-        color: 0x666666,
+        color: this.options.ceilColor || 0x666666,
         side: THREE.BackSide,
         shading: THREE.FlatShading
       }),
       'floor': new THREE.MeshPhongMaterial( {
-        color: 0x666666,
+        color: this.options.floorColor || 0x666666,
         side: THREE.BackSide,
         shading: THREE.FlatShading
       }),
@@ -38,22 +41,27 @@ class Room {
       this.materials['wall'],
       this.materials['wall']
     ]);
+    this.mesh.receiveShadow = true;
 
-    this.mesh.scale.x = w/1000
-    this.mesh.scale.y = h/1000
-    this.mesh.scale.z = l/1000
-    this.mesh.translateX(w/1000/2);
-    this.mesh.translateY(h/1000/2);
-    this.mesh.translateZ(l/1000/2);
-
+    this.mesh.scale.x = w
+    this.mesh.scale.y = h
+    this.mesh.scale.z = l
+    this.mesh.translateX(w/2);
+    this.mesh.translateY(h/2);
+    this.mesh.translateZ(l/2);
 
 
     this.scene.add(this.mesh)
-    this.light = new THREE.PointLight( 0xfffbba, 1, 200, 2 );
-    this.light.position.set( w/1000/2, h/1000, l/1000 );
-    this.scene.add( this.light );
-    this.loadTextures()
+    // this.light = new THREE.PointLight( 0xffffff, 1 );
+    this.light = new THREE.DirectionalLight( 0xFFFFFF );
+    this.light.castShadow = true;
+    this.light.position.set( w/2, h*.9, l*.9 );
 
+    this.light.shadow.camera.far = 10000;
+
+    this.scene.add( this.light );
+
+    this.loadTextures()
   }
 
 
@@ -84,7 +92,7 @@ class Room {
    * update data from the loaded object
    */
   updateData(obj, data){
-    obj.position.set(data.x/1000, data.y/1000, data.z/1000);
+    obj.position.set(data.x, data.y, data.z);
     obj.rotation.set(0,0,0);
     obj.rotateX(data.rx * Math.PI / 180);
     obj.rotateY(data.ry * Math.PI / 180);
@@ -130,9 +138,6 @@ class Room {
 
   setSize(data){
     this.mesh.position.set(0,0,0)
-    data.width   /= 1000
-    data.height  /= 1000
-    data.length  /= 1000
     this.mesh.scale.x = data.width ;
     this.mesh.scale.y = data.height;
     this.mesh.scale.z = data.length;

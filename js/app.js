@@ -1,5 +1,4 @@
 
-
 var QueryString = function () {
   // This function is anonymous, is executed immediately and
   // the return value is assigned to QueryString!
@@ -62,11 +61,16 @@ var materials = {};
 var selectedItemIndex;
 var items = document.getElementsByClassName("mesh-item");
 var form = document.getElementById("mesh-form");
-var piecesTable = $('#pieces-table');
+var piecesTable = $('#table-pieces');
 var modelsTable = $('#models-table');
 var roomTable   = $('#room-table');
 var filename;
-var appData = {};
+
+var appData = {
+  models: {}
+};
+
+
 var resourceManager = new GoogleResourceManager();
 
 
@@ -84,21 +88,56 @@ function initGoogleApi(){
  * inicializa la aplicacion cuando la informacion externa fue cargada
  */
 function initApp(){
+  initPiecesTable();
+  initModelsTable();
   fillModelsGuids();
   // obtiene las texturas disponibles
   resourceManager.getTextureList(function(texturesList){
+    editor.loadedTextures = texturesList;
     appData.textures = texturesList;
     tool.loadTextures(texturesList);
     // rellena select de textura en el editor de pieza
     fillTextureSelect(texturesList);
     loadDefaultModel();
   });
+
   appData['roomObjects'] = getRoomObjectsAvaliable();
   fillRoomObjectSelect( appData['roomObjects'] );
   tool.setAvaliableObjects( appData['roomObjects'] );
 }
 
-initApp();
+var options = {
+  modelsTable: '#table-models',
+  piecesTable: '#table-pieces',
+  viewer: tool,
+  pieceEditor: {
+    editor : '#piece-editor',
+    index : '#piece-editor-index',
+    model : '#piece-editor-model',
+    name  : '#piece-editor-name',
+    width : '#piece-editor input[name="w"]',
+    height: '#piece-editor input[name="h"]',
+    length: '#piece-editor input[name="l"]',
+    x     : '#piece-editor input[name="x"]',
+    y     : '#piece-editor input[name="y"]',
+    z     : '#piece-editor input[name="z"]',
+    visible  : '#piece-editor input[name="visible"]',
+    wireframe: '#piece-editor input[name="wireframe"]',
+    color    : '#piece-editor input[name="color"]',
+    texture        : '#piece-editor select[name="texture"]',
+    orientation    : '#piece-editor select[name="orientation"]',
+  }
+}
+
+var editor = new Editor(options);
+
+
+$(document).ready(function(){
+  initApp();
+})
+
+
+
 
 function loadDefaultModel(){
   /* si un modelo es especificado en la URL, entonces se carga automaticamente. */
@@ -124,13 +163,13 @@ function fillModelsGuids(){
 function updateProgress(progress){
   $("#bar-progress .progress-bar").css("width", progress+"%");
   if (progress < 100){
-    $("#models-load-tab .spinner").show();
-    $("#models-load-tab .content").hide();
+    $("#viewer").hide();
+    $(".spinner").show();
     $("#bar-progress").show();
   }
   else{
-    $("#models-load-tab .spinner").hide();
-    $("#models-load-tab .content").show();
+    $("#viewer").show();
+    $(".spinner").hide();
     $("#bar-progress").hide();
   }
 }
@@ -169,11 +208,16 @@ function loadModel(modelsToLoad){
         var parsedData = [];
         var data = response.feed.entry;
         filename = data[0].gsx$i.$t + "_" + data[0].gsx$j.$t + "_" + data[0].gsx$k.$t;
+        var idModel = (guidList.indexOf(this.modelGuid)+1);
 
         for (var i = 2; i < data.length; i++) {
           var obj = data[i];
           if (obj.gsx$b.$t.length == 0) continue;
+
           var pieceData = {
+              index: parsedData.length,
+              visible: true,
+              wireframe:  true,
               name: obj.gsx$b.$t,
               l: parseFloat(obj.gsx$d.$t.replace(',', '.')),
               w: parseFloat(obj.gsx$e.$t.replace(',', '.')),
@@ -183,6 +227,11 @@ function loadModel(modelsToLoad){
               y: parseFloat(obj.gsx$i.$t.replace(',', '.')),
               x: parseFloat(obj.gsx$j.$t.replace(',', '.')),
               z: parseFloat(obj.gsx$k.$t.replace(',', '.')),
+              model: "MOD"+idModel,
+          }
+          if (pieceData.w == 0 || pieceData.h == 0 || pieceData.l == 0){
+            log('danger', 'Pieza "'+pieceData.name + '" del modelo MOD'+idModel+' presenta datos no validos. Se omite.');
+            continue;
           }
           if (obj.gsx$l.$t.length > 0){
             var textureName = obj.gsx$l.$t;
@@ -200,13 +249,16 @@ function loadModel(modelsToLoad){
 
 
         // se actualiza la informacion en el visor y en la tabla de piezas
+        var model = {guid:this.modelGuid, tag: "MOD" + idModel, x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
 
-        var model = {guid:this.modelGuid, tag: "MOD" + (guidList.indexOf(this.modelGuid)+1), x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true, texture:null};
-        addPiecesList(parsedData, model.tag);
 
         tool.addModel({tag: model.tag, pieces:parsedData});
-        addModel(model);
 
+        editor.appendModel(model);
+
+        appData.models[model.tag] = model;
+        appData.models[model.tag].pieces = parsedData;
+        // setModelOnPiecesTable(model);
         // mark this model as loaded
         modelsLoaded[this.modelIndex] = true;
 
@@ -222,6 +274,9 @@ function loadModel(modelsToLoad){
         if (taskDone){
           updateProgress(100);
         }
+
+        // updateModelsTable();
+
     },
 
     error: function(response){
@@ -241,20 +296,12 @@ function isPieceValid(d){
 }
 
 // Agrega un modelo a la tabla de modelos
-function addModel(model){
-  var html = '<tr data-guid="'+model.guid+'">' +
-      '<td class="col-sm-2">'+model.tag+'</td>'+
-      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.x+'" placeholder="X"></td>' +
-      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.y+'" placeholder="Y"></td>' +
-      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.z+'" placeholder="Z"></td>' +
-      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.rx+'" placeholder="X"></td>' +
-      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.ry+'" placeholder="Y"></td>' +
-      '<td class="col-sm-1"><input type="number" size="1" step="0.1" value="'+model.rz+'" placeholder="Z"></td>' +
-      '<td><input type="checkbox" name="visible" checked></td>' +
-      '<td><div class="btn-group" role="group"><button class="btn btn-default btn-remove-model"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>'+
-      '</div></td>';
-  html += '</tr>';
-  modelsTable.append(html);
+function updateModelsTable(){
+  var models = []
+  for (var tag in appData.models) {
+    models.push(appData.models[tag]);
+  }
+  $('#table-models').bootstrapTable('load', models);
 }
 
 // actualiza los atributos del modelo en el visor con los datos obtenidos de la tabla
@@ -291,97 +338,68 @@ function updateRoomElement(evt){
 }
 
 /* extrae los datos del editor de piezas y lo envia al visor 3d para actualizar la pieza */
-function updatePiece(evt){
+function updatePiece(){
+  if ( $("#piece-editor-model").html().length <=0 ){
+    return false;
+  }
   var newData = getPieceEditorData();
   updatePieceOnList(newData);
   tool.updatePiece(newData);
 }
 
 function updatePieceOnList(data){
-  var row = $('#pieces-table-' + data.modelId + ' tbody tr:nth-child('+(parseInt(data.index)+1)+') td');
-  $(row[2]).html(data.w);
-  $(row[3]).html(data.h);
-  $(row[4]).html(data.l);
-  $(row[5]).html(data.x);
-  $(row[6]).html(data.y);
-  $(row[7]).html(data.z);
-  $(row[8]).find('div').css('background', data.color.replace('0x', '#'));
-  $(row[8]).attr('data-color', data.color.replace('0x', '#'));
-  $(row[9]).html(orientationList[data.orientation]);
-  $(row[10]).html(data.visible ? 'visible' : 'oculto');
-  $(row[11]).html(data.texture ? data.texture.name : '');
-  $(row[12]).html(data.wireframe ? 'visible' : 'oculto');
+  $('table[data-model="'+data.model+'"]').bootstrapTable('updateRow', data.index, data);
 }
 
-// crea una nueva tabla para las piezas del modelo cargado
-function addPiecesList(data, modelId){
-  $('#nav-models').append('<li id="nav-'+modelId+'"role="presentation"><a href="#'+modelId+'Tab" aria-controls="'+modelId+'Tab" role="tab" data-toggle="tab">'+modelId+'</a></li>')
-  $('#tab-content-models').append('<div role="tabpanel" class="tab-pane" id="'+modelId+'Tab"></div>')
-  var newTable = piecesTable.clone();
-  for (var i = 0; i < data.length; i++) {
-    var html = '<tr>' +
-        '<td>'+(i+1)+'</td>'+
-        '<td data-model-id="'+modelId+'">'+data[i].name+'</td>'+
-        '<td>'+data[i].w+'</td>' +
-        '<td>'+data[i].h+'</td>' +
-        '<td>'+data[i].l+'</td>' +
-        '<td>'+data[i].x+'</td>' +
-        '<td>'+data[i].y+'</td>' +
-        '<td>'+data[i].z+'</td>' +
-        '<td data-color="'+data[i].color.replace('0x', '#')+'"><div class="color-box" style="background:'+data[i].color.replace('0x', '#')+'"></td>'+
-        '<td>' + orientationList[data[i].orientation] + '</td>'+
-        '<td>visible</td>' +
-        '<td>'+ (data[i].texture == undefined ? '' : data[i].texture.name) + '</td>' +
-        '<td style="display:none">visible</td>';
-    html += '</td></tr>';
-    $('#'+modelId+'Tab').append(newTable);
-    newTable.find("tbody").append(html);
-    newTable.attr('id', 'pieces-table-' + modelId);
-    newTable.show();
+function cleanPieceEditor(){
+  $('#piece-editor')[0].reset();
+  $("#piece-editor-index").html("");
+  $("#piece-editor-model").html("");
+}
+
+// carga las piezas del modelo a la tabla de piezas
+function setModelOnPiecesTable(model){
+
+  // save the modified data of the model
+  var oldModelTag = $('#table-pieces').attr("data-model");
+  if (oldModelTag){
+    var oldData  = $('#table-pieces').bootstrapTable("getData");
+    appData.models[oldModelTag].pieces = oldData;
   }
+  if (oldModelTag == model.tag){
+    return;
+  }
+  // agrega los datos del nuevo modelo
+  $('#table-pieces').attr("data-model", model.tag);
+  $('#table-pieces').bootstrapTable("load", model.pieces);
+
+  // limpia el editor de piezas
+  cleanPieceEditor();
 }
 
 /* obtiene los datos desde el editor de piezas */
 function getPieceEditorData(){
-  data = {};
-  data.index = $("#piece-editor-index").html();
-  data.modelId = $("#piece-editor-model").html();
-  data.tag = $("#piece-editor-tag").html();
-  data.w = parseInt($("#piece-editor-width").val());
-  data.h = parseInt($("#piece-editor-height").val());
-  data.l = parseInt($("#piece-editor-length").val());
-  data.x = parseInt($("#piece-editor-x").val());
-  data.y = parseInt($("#piece-editor-y").val());
-  data.z = parseInt($("#piece-editor-z").val());
-  data.visible = $("#piece-editor-visible").is(':checked');
-  data.wireframe = $("#piece-editor-wireframe-visible").is(':checked');
-  var textureIndex = $("#piece-editor-texture option:selected").attr('data-index');
-  data.texture = textureIndex >= 0 ? appData.textures[textureIndex] : undefined;
-  var color = $("#piece-editor-color").val();
-  data.color = '0x' + color.replace(/[ #]/g, '');
-  data.orientation = parseInt($("#piece-editor-orientation").val());
+  var index   = $("#piece-editor-index").html();
+  var model   = $("#piece-editor-model").html();
+  var data = $('table[data-model="'+model+'"]').bootstrapTable('getRowByUniqueId', index);
+  var form = $('#piece-editor');
+
+  data.w = parseInt(form.find('input[name="w"]').val());
+  data.h = parseInt(form.find('input[name="h"]').val());
+  data.l = parseInt(form.find('input[name="l"]').val());
+  data.x = parseInt(form.find('input[name="x"]').val());
+  data.y = parseInt(form.find('input[name="y"]').val());
+  data.z = parseInt(form.find('input[name="z"]').val());
+  data.color = form.find('input[name="color"]').val();
+  data.visible     = form.find('input[name="visible"]').is(':checked');
+  data.wireframe   = form.find('input[name="wireframe"]').is(':checked');
+  data.orientation = form.find('select[name="orientation"]').val();
+
+  data.texture = appData.textures[parseInt(form.find('select[name="texture"] option:selected').attr('data-index'))];
+
   return data;
 }
 
-/* Actualiza el editor de pieza cuando el usuario da click en una pieza de la lista. */
-function setPieceEditorData(evt){
-  var row = $(evt.currentTarget).children();
-  $("#piece-editor-index").html(parseInt($(row[0]).html())-1);
-  $("#piece-editor-tag").html($(row[1]).html());
-  $("#piece-editor-model").html($(row[1]).attr('data-model-id'));
-  $("#piece-editor-width").val($(row[2]).html());
-  $("#piece-editor-height").val($(row[3]).html());
-  $("#piece-editor-length").val($(row[4]).html());
-  $("#piece-editor-x").val($(row[5]).html());
-  $("#piece-editor-y").val($(row[6]).html());
-  $("#piece-editor-z").val($(row[7]).html());
-  $("#piece-editor-color").val($(row[8]).attr('data-color'));
-  $("#piece-editor-orientation").val(orientationList.getKey($(row[9]).html()));
-  $("#piece-editor-visible").prop('checked', $(row[10]).html() == 'visible');
-  var texture = getTextureByName($(row[11]).html())
-  $("#piece-editor-wireframe-visible").prop('checked', $(row[12]).html() == 'visible');
-  $("#piece-editor-texture").val(texture ? texture.src : '-1');
-}
 
 /* obtiene la informacion completa de la textura segun su nombre */
 function getTextureByName(name){
@@ -404,11 +422,13 @@ function stringGen(len){
 
 /* rellena las opcion del elemento select en el editor de piezas */
 function fillTextureSelect(data){
-  var element = $('#piece-editor-texture');
+  var element = $('#piece-editor select[name="texture"]');
   for (var i = 0; i < data.length; i++) {
-    element.append('<option data-index="'+i+'" value="'+data[i].src+'"> ' + data[i].name  + '</option>');
+    data[i].index = i;
+    element.append('<option data-index="'+data[i].index+'" value="'+data[i].src+'"> ' + data[i].name  + '</option>');
   }
 }
+
 
 /* rellena las opcion del elemento select en el editor habitacion */
 function fillRoomObjectSelect(data){
@@ -416,6 +436,78 @@ function fillRoomObjectSelect(data){
   for (var i = 0; i < data.length; i++) {
     element.append('<option data-index="'+i+'" value="'+data[i].name+'"> ' + data[i].name  + '</option>');
   }
+}
+
+function initPiecesTable(){
+  return $('#table-pieces').bootstrapTable({
+    onClickRow: onPiecesRowClick,
+    classes: 'table table-no-bordered table-hover ',
+
+    uniqueId: 'index',
+    columns: [{
+        field: 'index',
+        title: '#',
+        visible: false,
+        formatter: function(value, row, index){
+          return value + 1;
+        }
+    }, {
+        field: 'name',
+        title: 'Nombre'
+    }, {
+        field: 'visible',
+        title: '<span class="glyphicon glyphicon-eye-open"></span>',
+        formatter: function(value){
+          if (value)
+            return '<span class="glyphicon-visible glyphicon glyphicon-eye-open"></span>';
+          return '<span class="text-muted glyphicon-visible glyphicon glyphicon-eye-close"></span>';
+        }
+    }],
+  });
+}
+
+function initModelsTable(){
+  return $('#table-models').bootstrapTable({
+    onClickRow: onModelsRowClick,
+    classes: 'table table-no-bordered table-hover',
+    uniqueId: 'guid',
+    columns: [{
+        field: 'guid',
+        title: '#',
+        visible: false,
+    }, {
+        field: 'tag',
+        title: 'Nombre'
+    }, {
+        field: 'visible',
+        title: '<span class="glyphicon glyphicon-eye-open"></span>',
+        formatter: function(value){
+          if (value)
+            return '<span class="glyphicon-visible glyphicon glyphicon-eye-open"></span>';
+          return '<span class="text-muted glyphicon-visible glyphicon glyphicon-eye-close"></span>';
+        }
+    }],
+  });
+}
+
+function onPiecesRowClick(piece, element, field){
+  // si el click fue sobre el boton de visibilidad
+  if (field == 'visible'){
+    piece.visible = !piece.visible;
+    editor.updatePiece(piece);
+  }
+  else
+    editor.selectPiece(piece);
+}
+
+function onModelsRowClick(model, element, cell){
+  // si el click fue sobre el boton de visibilidad
+  if (cell == 'visible'){
+    model.visible = !model.visible;
+    editor.updateModel(model);
+  }
+  else
+    editor.selectModel(model);
 }
 
 function getRoomObjectsAvaliable(){
@@ -429,4 +521,9 @@ function getRoomObjectsAvaliable(){
       "filename" : "basic_window.obj"
     }
   ];
+}
+
+function log(type, message){
+  var type = type || 'default';
+  $('#console').append('<p class="text-'+type+'">'+message+'</p>');
 }

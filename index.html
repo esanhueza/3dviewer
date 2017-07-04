@@ -9,6 +9,8 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap-toggle/bootstrap-toggle.min.css" rel="stylesheet">
     <link href="css/spinner.css" rel="stylesheet" type="text/css">
 		<link href="css/index.css" rel="stylesheet" type="text/css">
 
@@ -22,475 +24,372 @@
   <body>
 
 
-    <div class="container">
-    <div class="row">
-      <div class="col-xs-12 col-md-6">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs" role="tablist">
-              <li role="presentation" class="active"><a href="#models-load-tab" aria-controls="home" role="tab" data-toggle="tab">Modelos</a></li>
-              <li role="presentation"><a href="#preferences" aria-controls="profile" role="tab" data-toggle="tab">Configuracion</a></li>
-            </ul>
+    <div class="container-fluid">
 
-            <!-- Tab panes -->
-            <div class="tab-content">
-              <div role="tabpanel" class="tab-pane active" id="models-load-tab">
+      <div class="row row-top">
+        <div class="col-xs-12 col-md-6">
+          <div class="panel panel-default panel-top">
+            <div class="panel-body">
+
+              <div class="col-xs-12">
+                <div class="input-group">
+                  <select id="model-spreadsheet" name="spreadsheet" type="text" class="form-control"></select>
+                    <span class="input-group-btn">
+                      <button id="btn-load" type="button" class="btn btn-default  pull-right">
+                        <span class="glyphicon glyphicon-plus"></span>
+                      </button>
+                    </span>
+                </div><!-- /input-group -->
                 <br>
-                <div class="spinner" style="display:none">
-                  <div class="rect1"></div>
-                  <div class="rect2"></div>
-                  <div class="rect3"></div>
-                  <div class="rect4"></div>
-                  <div class="rect5"></div>
-                </div>
-                <div class="progress" id="bar-progress" style="display: none">
-                  <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                  </div>
+                <div class="btn-group btn-group">
+                  <button id="btn-load-all" type="button" class="btn btn-default" name="button">Cargar todos</button>
                 </div>
 
-                <div class="col-xs-12 content">
-                  <div class="input-group">
-                    <select id="model-spreadsheet" name="spreadsheet" type="text" class="form-control"></select>
-                      <span class="input-group-btn">
-                        <button id="btn-load" type="button" class="btn btn-default  pull-right">
-                          <span class="glyphicon glyphicon-plus"></span>
-                        </button>
-                      </span>
-                  </div><!-- /input-group -->
-                  <br>
-                  <!-- Load Button -->
-                  <div class="btn-group btn-group">
-                    <button id="btn-load-all" type="button" class="btn btn-default" name="button">Cargar todos</button>
-                  </div>
+                <div class="pull-right">
+                    <!-- Export Button -->
+                    <div class="btn-group">
 
-                  <div class="pull-right">
-                      <!-- Export Button -->
-                      <div class="btn-group">
+                      <button id="btn-dropdown-google" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Google Drive<span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a id="authorize-button" href="#">
+                            <span class="glyphicon glyphicon-user"></span>
+                            Iniciar sesión
+                          </a>
+                        </li>
+                        <li>
+                          <a id="signout-button" href="#">
+                            <span class="glyphicon glyphicon-user"></span>
+                            Cerrar sesión
+                          </a>
+                        </li>
+                        <li class="dropdown-google-item divider" role="separator"></li>
+                        <li class="dropdown-google-item">
+                          <a href="#" id="btn-google-export">
+                            <span class="glyphicon glyphicon-floppy-save"></span>
+                            Exportar modelo
+                          </a>
+                        </li>
+                        <li class="dropdown-google-item">
+                          <a href="#" id="btn-google-export-gif">
+                            <span class="glyphicon glyphicon-facetime-video"></span>
+                            Exportar GIF
+                          </a>
+                        </li>
+                        <li class="dropdown-google-item">
+                          <a href="#" id="btn-google-export-img">
+                            <span class="glyphicon glyphicon-picture"></span>
+                            Exportar IMG
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
 
-                        <button id="btn-dropdown-google" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          Google Drive<span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li>
-                            <a id="authorize-button" href="#">
-                              <span class="glyphicon glyphicon-user"></span>
-                              Iniciar sesión
-                            </a>
-                          </li>
-                          <li>
-                            <a id="signout-button" href="#">
-                              <span class="glyphicon glyphicon-user"></span>
-                              Cerrar sesión
-                            </a>
-                          </li>
-                          <li class="dropdown-google-item divider" role="separator"></li>
-                          <li class="dropdown-google-item">
-                            <a href="#" id="btn-google-export">
-                              <span class="glyphicon glyphicon-floppy-save"></span>
-                              Exportar modelo
-                            </a>
-                          </li>
-                          <li class="dropdown-google-item">
-                            <a href="#" id="btn-google-export-gif">
-                              <span class="glyphicon glyphicon-facetime-video"></span>
-                              Exportar GIF
-                            </a>
-                          </li>
-                          <li class="dropdown-google-item">
-                            <a href="#" id="btn-google-export-img">
-                              <span class="glyphicon glyphicon-picture"></span>
-                              Exportar IMG
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <!-- Boton exportar a pc -->
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          Exportar <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li>
-                            <a href="#" id="btn-export">
-                              <span class="glyphicon glyphicon-floppy-save"></span>
-                              Exportar modelo
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#" id="btn-export-gif">
-                              <span class="glyphicon glyphicon-facetime-video"></span>
-                              Exportar GIF
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#" id="btn-export-img">
-                              <span class="glyphicon glyphicon-picture"></span>
-                              Exportar IMG
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                  </div>
-                </div>
-
-              </div>
-              <div role="tabpanel" class="tab-pane" id="preferences">
-                <br>
-                <div class="col-xs-12" >
-                  <div class="form-group">
-                    <label for="spreadsheet">
-                      <span class="glyphicon glyphicon-link"></span>
-                      Links
-                    </label>
-                    <input id="input-list-spreadsheet" name="spreadsheet" type="text" class="form-control" placeholder="Link a a listado de modelos" value="https://docs.google.com/spreadsheets/d/1Io9jL33nJIm5jZVzr5UtQTqny-1IRmnOLO2XK-ZOSjE/edit#gid=0">
-                    <p class="help-block">Link a listado de modelos.</p>
-                  </div>
+                    <!-- Boton exportar a pc -->
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Exportar <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a href="#" id="btn-export">
+                            <span class="glyphicon glyphicon-floppy-save"></span>
+                            Exportar modelo
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#" id="btn-export-gif">
+                            <span class="glyphicon glyphicon-facetime-video"></span>
+                            Exportar GIF
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#" id="btn-export-img">
+                            <span class="glyphicon glyphicon-picture"></span>
+                            Exportar IMG
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
                 </div>
               </div>
+
             </div>
           </div>
+        </div>
+        <div class="col-md-6 col-xs-12">
+          <div class="panel panel-default panel-top">
+            <div class="panel-body">
+              <div class="btn-group-vertical" data-toggle="buttons">
+                <label class="btn btn-default">
+                  <input type="checkbox" id="rotate-check" autocomplete="off"> <span class="glyphicon glyphicon-repeat"></span> Rotar
+                </label>
+                <label class="btn btn-default">
+                  <input type="checkbox" id="grid-check" autocomplete="off"> <span class="glyphicon glyphicon-th-large"></span> Rejilla
+                </label>
+                <label class="">
+                  <input type="range" id="input-main-light" value="1" max="1" min="0" step="0.1">Intensidad de luz
+                </label>
+              </div>
+              <div class="btn-group pull-right">
+                  <input type="color" id="edge-color" name="color" value="#ffffff"> Color de borde
+              </div>
+                <!-- <div class="btn-group pull-right">
+                  <input type="range" id="piece-scale" name="scale" step="0.01" max="1" min="0.9" value="0.98"> Llenado
+                </div -->
+            </div>
+          </div>
+
         </div>
       </div>
-      <div class="col-md-6 col-xs-12">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <div class="btn-group-vertical" data-toggle="buttons">
-              <label class="btn btn-default">
-                <input type="checkbox" id="rotate-check" autocomplete="off"> <span class="glyphicon glyphicon-repeat"></span> Rotar
-              </label>
-              <label class="btn btn-default">
-                <input type="checkbox" id="grid-check" autocomplete="off"> <span class="glyphicon glyphicon-th-large"></span> Rejilla
-              </label>
-              <label class="">
-                <input type="range" id="input-main-light" value="1" max="1" min="0" step="0.1">Intensidad de luz
-              </label>
-            </div>
-            <div class="btn-group pull-right">
-                <input type="color" id="edge-color" name="color" value="#ffffff"> Color de borde
-            </div>
-              <!-- <div class="btn-group pull-right">
-                <input type="range" id="piece-scale" name="scale" step="0.01" max="1" min="0.9" value="0.98"> Llenado
-              </div -->
-          </div>
-        </div>
 
-      </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-xs-12 col-md-12">
-          <div class="panel panel-default">
-            <div class="panel-body fixed-panel">
-              <div id="viewer">
-              </div>
-            </div>
-          </div>
-        </div>
-      <br>
-        <div class="col-xs-12">
-          <div class="panel panel-default">
-  				  <div class="panel-body fixed-table">
+      <div class="row row-central">
+        <div class="col-xs-12 col-md-2">
+          <div class="panel panel-default panel-central">
+            <div class="panel-body">
 
                 <!-- Nav tabs -->
-                <ul class="nav nav-tabs" role="tablist">
+                <ul class="nav nav-tabs nav-justified" role="tablist">
                   <li role="presentation" class="active"><a href="#piecesTab" aria-controls="piecesTab" role="tab" data-toggle="tab">Piezas</a></li>
-                  <li role="presentation"><a href="#modelsTab" aria-controls="modelsTab" role="tab" data-toggle="tab">Modelos</a></li>
-                  <li role="presentation"><a href="#roomTab" aria-controls="roomsTab" role="tab" data-toggle="tab">Habitacion</a></li>
+                  <li role="presentation"><a href="#roomTab" aria-controls="roomsTab" role="tab" data-toggle="tab">Habitación</a></li>
                 </ul>
 
                 <!-- Tab panes -->
                 <div class="tab-content">
                   <br>
                   <div role="tabpanel" class="tab-pane active" id="piecesTab">
-                    <br>
-                    <div class="panel panel-default">
-                      <div class="panel-heading">
-                        <span id="piece-editor-index"></span>
-                        <h4>
-                          <span id="piece-editor-model">Nombre modelo</span> -
-                          <span id="piece-editor-tag" >Tag pieza</span>
-                        </h4>
-                      </div>
-                      <div class="panel-body">
-                        <div class="row">
-                          <div class="col-md-2 col-sm-2 col-xs-2">
-                              <span class="help-block text-muted small-font">Ancho</span>
-                              <input id="piece-editor-width" class="piece-editor-item" type="text" class="form-control" placeholder="Ancho">
-                          </div>
-                           <div class="col-md-2 col-sm-2 col-xs-2">
-                              <span class="help-block text-muted small-font">Espesor</span>
-                              <input class="piece-editor-item" id="piece-editor-height" type="text" class="form-control" placeholder="Espesor">
-                          </div>
-                          <div class="col-md-2 col-sm-2 col-xs-2">
-                              <span class="help-block text-muted small-font">Largo</span>
-                              <input class="piece-editor-item" id="piece-editor-length" type="text" class="form-control" placeholder="Largo">
-                          </div>
-                          <div class="col-md-2 col-sm-2 col-xs-2">
-                              <span class="help-block text-muted small-font">X</span>
-                              <input class="piece-editor-item" id="piece-editor-x" type="text" class="form-control" placeholder="X">
-                          </div>
-                           <div class="col-md-2 col-sm-2 col-xs-2">
-                                <span class="help-block text-muted small-font">Y</span>
-                                <input class="piece-editor-item" id="piece-editor-y" type="text" class="form-control" placeholder="Y">
-                            </div>
-                          <div class="col-md-2 col-sm-2 col-xs-2">
-                              <span class="help-block text-muted small-font">Z</span>
-                              <input class="piece-editor-item" id="piece-editor-z" type="text" class="form-control" placeholder="Z">
-                          </div>
-                        </div>
-                        <br>
-                        <div class="row ">
-                          <div class="col-md-1 col-sm-1 col-xs-1">
-                              <span class="help-block text-muted small-font">Visible</span>
-                              <input class="piece-editor-item" id="piece-editor-visible" type="checkbox" name="visible" checked>
-                          </div>
-                          <div class="col-md-1 col-sm-1 col-xs-1">
-                              <span class="help-block text-muted small-font">Bordes</span>
-                              <input class="piece-editor-item" id="piece-editor-wireframe-visible" type="checkbox" name="visible" checked>
-                          </div>
-                          <div class="col-md-1 col-sm-1 col-xs-1">
-                              <span class="help-block text-muted small-font">Color</span>
-                              <input class="piece-editor-item" id="piece-editor-color" type="color" class="form-control">
-                          </div>
-                          <div class="col-md-3 col-sm-3 col-xs-3">
-                            <div class="input-group">
-                              <span class="help-block text-muted small-font">Textura</span>
-                              <select class="form-control piece-editor-item" id="piece-editor-texture">
-                                <option data-index="-1" value="-1">Ninguna</option>
-                              </select>
-
-                            </div>
-                          </div>
-                          <div class="col-md-3 col-sm-3 col-xs-3">
-                            <div class="input-group">
-                              <span class="help-block text-muted small-font">Orientacion</span>
-                              <select class="piece-editor-item form-control" id="piece-editor-orientation">
-                                <option value="1"> Vertical de corte </option>
-                                <option value="2"> Horizontal de corte </option>
-                                <option value="3"> Vertical de frente </option>
-                                <option value="4"> Horizontal de frente </option>
-                              </select>
-
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <br>
-                    <!-- Nav tabs -->
-                    <ul id="nav-models" class="nav nav-tabs" role="tablist">
-
-                    </ul>
+                    <table id="table-models" class="table"></table>
+                    <hr>
+                    <table id="table-pieces" class="table-model" data-model=""></table>
 
                     <!-- Tab panes -->
-                    <div id="tab-content-models" class="tab-content">
+                    <div id="tab-content-models" class="tab-content"></div>
 
-                    </div>
-
-                  </div>
-                  <div role="tabpanel" class="tab-pane" id="modelsTab">
-                    <table id="models-table" class="table">
-                      <thead>
-                        <tr>
-                          <th class="col-sm-2" colspan="1">TAG</th>
-                          <th class="col-sm-3" colspan="3">Posición(X,Y,Z)</th>
-                          <th class="col-sm-3" colspan="3">Orientación(X,Y,Z)</th>
-                          <th class="col-sm-1">Visible</th>
-                          <th class="col-sm-1">Opciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                    </table>
                   </div>
 
                   <div role="tabpanel" class="tab-pane" id="roomTab">
 
                     <div class="col-xs-12">
-                      <div class="panel panel-default">
+                      <div class="form-group">
+                        <input id="btn-create-room" data-off=" " data-on=" " data-onstyle="success"  type="checkbox" data-toggle="toggle" data-width="100%">
+                      </div>
+                    </div>
 
-                        <div class="panel-body">
-                          <div class="col-xs-6">
-                            <button id="btn-create-room" type="button" class="btn btn-primary btn-block" aria-label="...">
-                              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                              Crear
+                    <div id="room-attributes" style="display:none">
+
+
+                      <div class="col-xs-12">
+                        <h4 class="page-header">Medidas</h4>
+                      </div>
+
+                      <div class="row">
+
+                        <div class="col-xs-4">
+                            <span class="help-block text-muted small-font">Ancho</span>
+                            <input id="input-room-width" type="text" class="form-control" value="4000">
+                        </div>
+                         <div class="col-xs-4">
+                            <span class="help-block text-muted small-font">Espesor</span>
+                            <input id="input-room-height" type="text" class="form-control" value="2600">
+                        </div>
+                        <div class="col-xs-4">
+                            <span class="help-block text-muted small-font">Largo</span>
+                            <input id="input-room-length" type="text" class="form-control" value="6000">
+                        </div>
+                      </div>
+
+                      <div class="col-xs-12">
+                        <h4 class="page-header">Colores</h4>
+                      </div>
+
+                      <div class="row">
+                          <div class="form-group col-xs-4">
+                            <label for="input-wall-color" class="control-label">Murallas</label>
+                            <input id="input-wall-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                          </div>
+                          <div class="form-group col-xs-4">
+                            <label for="input-ceil-color" class="control-label">Techo</label>
+                              <input id="input-ceil-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                          </div>
+                          <div class="form-group col-xs-4">
+                            <label for="input-floor-color" class="control-label">Piso</label>
+                            <input id="input-floor-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                          </div>
+                      </div>
+
+                      <div class="col-xs-12">
+                        <h4 class="page-header">Luz</h4>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-xs-12 col-md-6">
+                          <input id="input-light-enabled" type="checkbox" checked data-toggle="toggle" data-onstyle="primary" data-width="100%">
+                        </div>
+
+                        <div class="col-xs-12 col-md-6">
+                          <input id="input-light-visible" type="checkbox" checked data-toggle="toggle" data-onstyle="primary" data-width="100%">
+                        </div>
+                      </div>
+
+                      <div class="row">
+
+
+
+                        <div class="form-group col-xs-12 col-md-6">
+                            <label for="input-light-color" class="control-label">Color</label>
+                            <input id="input-light-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
+                        </div>
+
+                        <div class="form-group col-xs-12 col-md-6">
+                          <label for="input-light-intensity" class="control-label">Intensidad</label>
+                            <input id="input-light-intensity" type="range" step="0.1" min="0" max="1" class="form-control" aria-label="..." value="1">
+                        </div>
+
+                      </div>
+
+                      <div class="row">
+
+                        <div class="col-xs-12">
+                          <select class="form-control" id="object-editor-select"></select>
+                          <span class="input-group-btn">
+                            <button id="btn-add-room-element" class="btn btn-default btn-block" type="button" name="button">
+                              <span class="glyphicon glyphicon-plus"></span>
                             </button>
-                          </div>
-                          <div class="col-xs-6">
-                            <button id="btn-remove-room" type="button" class="btn btn-warning btn-block" aria-label="...">
-                              <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                              Eliminar
-                            </button>
-                          </div>
+                          </span>
                         </div>
                       </div>
+
                     </div>
 
-                    <div class="col-md-6 col-xs-12">
-                      <div class="panel panel-default">
-                        <div class="panel-heading">
-                          <h3 class="panel-title">Dimensiones de la habitación</h3>
-                        </div>
-                        <div class="panel-body">
-                          <form class="form">
-                            <div class="form-group col-xs-4">
-                                <label for="input-room-width" class="control-label">Ancho</label>
-                                <input id="input-room-width" type="integer" step="1" class="form-control" aria-label="..." placeholder="Ancho" value="4000">
-                            </div>
-                            <div class="form-group col-xs-4">
-                                <label for="input-room-height" class="control-label">Altura</label>
-                                <input id="input-room-height" type="integer" step="1" class="form-control" aria-label="..." placeholder="Altura" value="2600">
-                            </div>
-                            <div class="form-group col-xs-4">
-                                <label for="input-room-length" class="control-label">Largo</label>
-                                <input id="input-room-length" type="integer" step="1" class="form-control" aria-label="..." placeholder="Largo" value="6000">
-                            </div>
-                          </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                        </div>
-                      </div>
+        <div class="col-xs-12 col-md-8">
+          <div class="panel panel-default panel-viewer">
+            <div class="panel-body fixed-panel">
+              <div id="viewer">
+              </div>
+
+              <div class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-12 col-md-2">
+          <div class="panel panel-default panel-central">
+            <div class="panel-heading">
+              <span id="piece-editor-index"></span>
+
+                <span id="piece-editor-model"></span> -
+                <span id="piece-editor-name" ></span>
+
+            </div>
+            <div class="panel-body">
+              <form id="piece-editor">
+                <div class="row">
+                  <div class="col-xs-4">
+                      <span class="help-block text-muted small-font">Ancho</span>
+                      <input name="w" type="text" class="form-control" placeholder="Ancho">
+                  </div>
+                   <div class="col-xs-4">
+                      <span class="help-block text-muted small-font">Espesor</span>
+                      <input name="h" type="text" class="form-control" placeholder="Espesor">
+                  </div>
+                  <div class="col-xs-4">
+                      <span class="help-block text-muted small-font">Largo</span>
+                      <input name="l" type="text" class="form-control" placeholder="Largo">
+                  </div>
+                  <div class="col-xs-4">
+                      <span class="help-block text-muted small-font">X</span>
+                      <input name="x" type="text" class="form-control" placeholder="X">
+                  </div>
+                   <div class="col-xs-4">
+                        <span class="help-block text-muted small-font">Y</span>
+                        <input name="y" type="text" class="form-control" placeholder="Y">
                     </div>
-
-                    <div class="col-md-6 col-xs-12">
-                      <div class="panel panel-default">
-                        <div class="panel-heading">
-                          <h3 class="panel-title">Colores</h3>
-                        </div>
-                        <div class="panel-body">
-                          <form class="form">
-                            <div class="form-group col-xs-4">
-                              <label for="input-wall-color" class="control-label">Murallas</label>
-                              <input id="input-wall-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
-                            </div>
-                            <div class="form-group col-xs-4">
-                              <label for="input-ceil-color" class="control-label">Techo</label>
-                                <input id="input-ceil-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
-                            </div>
-                            <div class="form-group col-xs-4">
-                              <label for="input-floor-color" class="control-label">Piso</label>
-                              <input id="input-floor-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-6 col-xs-12">
-                      <div class="panel panel-default">
-                        <div class="panel-heading">
-                          <h3 class="panel-title">Luz</h3>
-                        </div>
-                        <div class="panel-body">
-                          <div class="col-xs-12 btn-group btn-group-justified" data-toggle="buttons">
-                            <label class="btn btn-default active">
-                              <input id="input-light-enabled" type="checkbox"  autocomplete="off" checked> Activada
-                            </label>
-                            <label class="btn btn-default">
-                              <input id="input-light-visible" type="checkbox"  autocomplete="off" checked> Visible
-                            </label>
-                          </div>
-                          <br>
-                          <div class="form-group col-xs-12 col-md-6">
-                              <label for="input-light-color" class="control-label">Color</label>
-                              <input id="input-light-color" type="color" class="form-control" aria-label="..." value="#aaaaaa">
-                          </div>
-                          <div class="form-group col-xs-12 col-md-6">
-                            <label for="input-light-intensity" class="control-label">Intensidad</label>
-                              <input id="input-light-intensity" type="range" step="0.1" min="0" max="1" class="form-control" aria-label="..." value="1">
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-
-
-                    <div class="col-xs-12">
-                      <div class="panel panel-default">
-                        <div class="panel-heading">
-                          <h3 class="panel-title">Elementos</h3>
-                        </div>
-                        <div class="panel-body">
-                          <div class="input-group col-xs-6">
-
-                            <select class="form-control" id="object-editor-select"></select>
-                            <span class="input-group-btn">
-                              <button id="btn-add-room-element" class="btn btn-default" type="button" name="button">
-                                <span class="glyphicon glyphicon-plus"></span>
-                              </button>
-                            </span>
-                          </div>
-                          <hr>
-                          <table id="room-table" class="table">
-                            <thead>
-                              <tr class="static">
-                                <th class="col-sm-2" colspan="1">Tipo</th>
-                                <th class="col-sm-3" colspan="3">Posición(X,Y,Z)</th>
-                                <th class="col-sm-3" colspan="3">Orientación(X,Y,Z)</th>
-                                <th class="col-sm-1">Visible</th>
-                                <th class="col-sm-1">Opciones</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr class="row-template static" style="display: none;">
-                                <td class="col-sm-2"></td>
-                                <td class="col-sm-1"><input type="number" value="1"></td>
-                                <td class="col-sm-1"><input type="number" value="1"></td>
-                                <td class="col-sm-1"><input type="number" value="1"></td>
-                                <td class="col-sm-1"><input type="number" value="1"></td>
-                                <td class="col-sm-1"><input type="number" value="1"></td>
-                                <td class="col-sm-1"><input type="number" value="1"></td>
-                                <td><input type="checkbox" name="visible" checked></td>
-                                <td><div class="btn-group" role="group"><button class="btn btn-default btn-remove-room-element"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-
+                  <div class="col-xs-4">
+                      <span class="help-block text-muted small-font">Z</span>
+                      <input name="z" type="text" class="form-control" placeholder="Z">
                   </div>
                 </div>
+                <br>
+                <div class="row ">
+                  <div class="col-xs-6">
+                      <span class="help-block text-muted small-font">Visible</span>
+                      <input name="visible" type="checkbox" checked data-toggle="toggle" data-width="100%" data-off="X" data-on="<span class='glyphicon glyphicon-ok' aria-hidden='true'></span>">
+                  </div>
+                  <div class="col-xs-6">
+                      <span class="help-block text-muted small-font">Bordes</span>
+                      <input name="wireframe" type="checkbox" checked data-toggle="toggle" data-width="100%" data-off="X" data-on="<span class='glyphicon glyphicon-ok' aria-hidden='true'></span>">
+                  </div>
 
-  			      </div>
-  			    </div>
+                  <div class="col-xs-12">
+                      <span class="help-block text-muted small-font">Color</span>
+                      <input class="form-control" name="color" type="color">
+                  </div>
+                  <div class="col-xs-12">
+                    <div class="input-group">
+                      <span class="help-block text-muted small-font">Textura</span>
+                      <select class="form-control " name="texture">
+                        <option data-index="-1" value="-1">Ninguna</option>
+                      </select>
+
+                    </div>
+                  </div>
+                  <div class="col-xs-12">
+                    <div class="input-group">
+                      <span class="help-block text-muted small-font">Orientación</span>
+                      <select class="form-control" name="orientation">
+                        <option value="1"> Vertical de corte </option>
+                        <option value="2"> Horizontal de corte </option>
+                        <option value="3"> Vertical de frente </option>
+                        <option value="4"> Horizontal de frente </option>
+                      </select>
+
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="row row-bottom">
+        <div class="col-xs-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              Mensajes
+            </div>
+            <div id="console" class="panel-body">
+
+            </div>
+          </div>
+        </div>
+      </div>
+
 	 </div>
 
-
-
-
-   <!-- Hidden Content -->
-   <div style="display: none">
-
-     <table id="pieces-table" class="table table-hover" >
-       <thead>
-         <tr>
-           <th class="col-md-1">#</th>
-           <th class="col-md-1">TAG</th>
-           <th class="col-md-1">Ancho</th>
-           <th class="col-md-1">Espesor</th>
-           <th class="col-md-1">Largo</th>
-           <th class="col-md-1">X</th>
-           <th class="col-md-1">Y</th>
-           <th class="col-md-1">Z</th>
-           <th class="col-md-1">Color</th>
-           <th class="col-md-1">Orientación</th>
-           <th class="col-md-1">Visible</th>
-           <th class="col-md-1">Textura</th>
-         </tr>
-       </thead>
-       <tbody>
-       </tbody>
-     </table>
-    </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script src="vendor/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="vendor/bootstrap-toggle/bootstrap-toggle.min.js"></script>
 		<script src="js/three.min.js"></script>
 
 		<script src="js/GoogleResourceManager.js"></script>
@@ -501,6 +400,7 @@
     <script src="js/OBJExporter.js"></script>
 		<script src="js/OBJLoader.js"></script>
 		<script src="js/OrbitControls.js"></script>
+		<script src="js/Editor.js"></script>
 		<script src="js/Room.js"></script>
 		<script src="js/Viewer.js"></script>
 		<script src="js/app.js"></script>

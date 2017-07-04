@@ -21,6 +21,10 @@ $('#edge-color').on('change', function (){
     tool.setEdgeColor(this.value.replace('#','0x'));
 });
 
+$('#btn-export-img-dimensions').on('click', function(){
+  tool.getDimensionsIMG.call(tool);
+});
+
 $('#btn-export').on('click', function(){
   $("#models-load-tab .spinner").show();
   $("#models-load-tab .content").hide
@@ -55,13 +59,8 @@ $('#btn-google-export-gif').on('click', function(){
 });
 
 
-
-$('.piece-editor-item').on('change', updatePiece);
-$('#tab-content-models').on('click', '.tab-pane table tbody tr', setPieceEditorData);
-
-
-
 $('#models-table tbody').on('change', 'tr td input, tr td select', updateModel);
+
 $('#models-table tbody').on('click', '.btn-remove-model', function(){
   var search = $(this).parentsUntil('tbody');
   var row = $(search[search.length-1]);
@@ -92,22 +91,26 @@ $('#btn-export-gif').on('click', function(){
 });
 
 
-$('#btn-create-room').on('click', function (){
-  var w = $("#input-room-width").val()
-  var h = $("#input-room-height").val()
-  var l = $("#input-room-length").val()
-  tool.createRoom(w,h,l,{
-    clean: ''
-  })
-  $("#input-main-light").val(0.5);
-  $("#input-main-light").trigger('change');
-
+$('#btn-create-room').on('change', function (evt){
+  if ($(this).is(':checked')){
+    var params = {};
+    var w = $("#input-room-width").val();
+    var h = $("#input-room-height").val();
+    var l = $("#input-room-length").val();
+    params.wallColor  = $('#input-wall-color').val();
+    params.ceilColor  = $('#input-ceil-color').val();
+    params.floorColor = $('#input-floor-color').val();
+    tool.createRoom(w,h,l,params)
+    $("#input-main-light").val(0.5);
+    $("#input-main-light").trigger('change');
+    $('#room-attributes').show();
+  }
+  else{
+    $('#room-attributes').hide();
+    tool.removeRoom();
+  }
 });
 
-$('#btn-remove-room').on('click', function (){
-  roomTable.find("tbody tr:not(.row-template)").remove();
-  tool.removeRoom();
-});
 
 $('#btn-add-room-element').on('click', function (){
   if (!tool.room){

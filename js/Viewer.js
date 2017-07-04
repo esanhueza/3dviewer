@@ -8,20 +8,29 @@ class Viewer {
       preserveDrawingBuffer: true,
       antialias: true,
     });
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMapSoft = true;
+
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
-    this.grid = [];
+    this.gridHelper = null;
     this.meshes = [];
     this.wireframes = [];
     this.models = [];
     this.centerPivot = new THREE.Object3D();
+
     this.group = new THREE.Group();
+    this.group.castShadow = true;
+    this.group.receiveShadow = true;
+    this.group.scale.set(0.001, 0.001, 0.001);
+
     this.autoRotate = false;
     this.fixCamera = false;
     this.pieceScale = 1;
     this.textures = {};
     this.roomObjects = [];
-    this.textureSize = {width: 768, height:1024}
+    this.textureSize = {width: 1830, height:2600}
     this.materials = {
       'wood' : new THREE.MeshPhongMaterial( {
         color: 0xffffff,
@@ -48,7 +57,7 @@ class Viewer {
     this.container = container;
     this.renderer.setSize( container.offsetWidth, container.offsetHeight );
     this.container.appendChild( this.renderer.domElement );
-    this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.2, 20 );
+    this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.1, 20 );
     // Set camera position
     this.camera.position.y = 6;
     this.camera.position.z = 8;
@@ -65,6 +74,7 @@ class Viewer {
     this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
     this.mainLight = new THREE.AmbientLight( 0xffffff ); // soft white light
     this.scene.add( this.mainLight );
+
   }
 
 
@@ -97,11 +107,11 @@ class Viewer {
     this.room = null;
   }
 
-  createRoom(w,h,l){
+  createRoom(w,h,l, options){
     if (this.room){
       this.removeRoom()
     }
-    this.room = new Room(w,h,l);
+    this.room = new Room(w,h,l, options);
     this.room.avaliableObjects = this.objects;
     this.scene.add(this.room.getMesh());
     return this.room;
@@ -155,6 +165,7 @@ class Viewer {
   createModel(data){
     var group = new THREE.Group();
     group.tag = data.tag;
+    group.castShadow = true;
 
     // Creating meshes
     for (var i = 0; i < data.pieces.length; i++) {
@@ -174,88 +185,63 @@ class Viewer {
     this.centerPivot.rotation.y += r;
   }
 
-  correctSize(data){
-    var position;
-    // rotate position Vector3
-    if (data.orientation == 1){
-      position = new THREE.Vector3(data.h, data.l, data.w);
-    }
-    else if (data.orientation == 2){
-      position = new THREE.Vector3(data.l, data.h, data.w);
-    }
-    else if (data.orientation == 3){
-      position = new THREE.Vector3(data.l, data.w, data.h);
-    }
-    else if (data.orientation == 4){
-      position = new THREE.Vector3(data.w, data.l, data.h);
-    }
-    else{
-      position = new THREE.Vector3(data.w, data.h, data.l);
-    }
+  createPiece(data){
+    var dimensions = adjustDimensions(data);
+    var geometry = new THREE.BoxGeometry( dimensions.w, dimensions.h, dimensions.l );
 
-    data.x = data.x/1000;
-    data.y = data.y/1000;
-    data.z = data.z/1000;
-    data.w = Math.abs(position.x/1000);
-    data.h = Math.abs(position.y/1000);
-    data.l = Math.abs(position.z/1000);
-    return data;
-  }
+    geometry.faceVertexUvs[0][8][0].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][8][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][9][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][8][2].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][9][1].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][9][2].x = dimensions.w / this.textureSize.width;
 
-  createPiece(d){
-    var data = this.correctSize(d);
-    var geometry = new THREE.BoxGeometry( data.w, data.h, data.l );
+    geometry.faceVertexUvs[0][10][0].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][10][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][10][2].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][11][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][11][1].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][11][2].x = dimensions.w / this.textureSize.width;
 
-    geometry.faceVertexUvs[0][8][0].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][8][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][9][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][8][2].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][9][1].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][9][2].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][4][0].y = dimensions.l / this.textureSize.height;
+    geometry.faceVertexUvs[0][4][2].y = dimensions.l / this.textureSize.height;
+    geometry.faceVertexUvs[0][4][2].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][5][2].y = dimensions.l / this.textureSize.height;
+    geometry.faceVertexUvs[0][5][1].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][5][2].x = dimensions.w / this.textureSize.width;
 
-    geometry.faceVertexUvs[0][10][0].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][10][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][10][2].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][11][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][11][1].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][11][2].x = data.w * 1000 / this.textureSize.width;
-
-    geometry.faceVertexUvs[0][4][0].y = data.l * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][4][2].y = data.l * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][4][2].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][5][2].y = data.l * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][5][1].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][5][2].x = data.w * 1000 / this.textureSize.width;
-
-    geometry.faceVertexUvs[0][6][0].y = data.l * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][6][2].y = data.l * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][6][2].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][7][2].y = data.l * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][7][1].x = data.w * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][7][2].x = data.w * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][6][0].y = dimensions.l / this.textureSize.height;
+    geometry.faceVertexUvs[0][6][2].y = dimensions.l / this.textureSize.height;
+    geometry.faceVertexUvs[0][6][2].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][7][2].y = dimensions.l / this.textureSize.height;
+    geometry.faceVertexUvs[0][7][1].x = dimensions.w / this.textureSize.width;
+    geometry.faceVertexUvs[0][7][2].x = dimensions.w / this.textureSize.width;
 
 
-    geometry.faceVertexUvs[0][0][0].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][0][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][0][2].x = data.l * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][1][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][1][1].x = data.l * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][1][2].x = data.l * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][0][0].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][0][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][0][2].x = dimensions.l / this.textureSize.width;
+    geometry.faceVertexUvs[0][1][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][1][1].x = dimensions.l / this.textureSize.width;
+    geometry.faceVertexUvs[0][1][2].x = dimensions.l / this.textureSize.width;
 
-    geometry.faceVertexUvs[0][2][0].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][2][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][2][2].x = data.l * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][3][2].y = data.h * 1000 / this.textureSize.height;
-    geometry.faceVertexUvs[0][3][1].x = data.l * 1000 / this.textureSize.width;
-    geometry.faceVertexUvs[0][3][2].x = data.l * 1000 / this.textureSize.width;
+    geometry.faceVertexUvs[0][2][0].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][2][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][2][2].x = dimensions.l / this.textureSize.width;
+    geometry.faceVertexUvs[0][3][2].y = dimensions.h / this.textureSize.height;
+    geometry.faceVertexUvs[0][3][1].x = dimensions.l / this.textureSize.width;
+    geometry.faceVertexUvs[0][3][2].x = dimensions.l / this.textureSize.width;
 
 
     var pieceMesh = new THREE.Mesh(geometry, this.materials['wood'].clone());
+
+    pieceMesh.castShadow = true;
+    pieceMesh.receiveShadow = true;
     var edges = new THREE.EdgesGeometry( geometry );
     var wireframe = new THREE.LineSegments( edges, this.materials['wireframe']) ;
 
-    if (d.texture && this.textures[d.texture.name] != undefined){
-      pieceMesh.material.map = this.textures[d.texture.name];
+    if (data.texture && this.textures[data.texture.name] != undefined){
+      pieceMesh.material.map = this.textures[data.texture.name];
     }
     else{
       pieceMesh.material.color.setHex(data.color);
@@ -263,14 +249,14 @@ class Viewer {
 
     wireframe.visible = data.wireframe;
 
-    pieceMesh.position.x = data.x + data.w/2;
-    pieceMesh.position.y = data.y + data.h/2;
-    pieceMesh.position.z = data.z + data.l/2;
+    pieceMesh.position.x = data.x + dimensions.w/2;
+    pieceMesh.position.y = data.y + dimensions.h/2;
+    pieceMesh.position.z = data.z + dimensions.l/2;
     pieceMesh.scale.set(this.pieceScale,this.pieceScale,this.pieceScale);
 
-    wireframe.position.x = data.x + data.w/2;
-    wireframe.position.y = data.y + data.h/2;
-    wireframe.position.z = data.z + data.l/2;
+    wireframe.position.x = data.x + dimensions.w/2;
+    wireframe.position.y = data.y + dimensions.h/2;
+    wireframe.position.z = data.z + dimensions.l/2;
 
     pieceMesh.tag = data.name;
 
@@ -281,7 +267,7 @@ class Viewer {
 
   updatePiece(data){
     var result = this.createPiece(data);
-    var model  = this.findModelByTag(data.modelId);
+    var model  = this.findModelByTag(data.model);
     if (!model) return;
 
     for (var i = 0; i < model.children.length; i++) {
@@ -309,9 +295,9 @@ class Viewer {
     if (model == undefined)
       return
 
-    model.position.x = d.x/1000;
-    model.position.y = d.y/1000;
-    model.position.z = d.z/1000;
+    model.position.x = d.x;
+    model.position.y = d.y;
+    model.position.z = d.z;
     model.visible = d.visible;
     this.rotateModel(model, d);
   }
@@ -365,15 +351,11 @@ class Viewer {
   }
 
   createGrid(){
-    for (var i = 0; i < 101; i++) {
-      var line = this.createLine({x: -50 + i, y:0, z:-50}, {x: -50 + i, y:0, z:50})
-      line.visible = false;
-      this.grid.push(line);
-      var line2 = this.createLine({x: -50, y: 0, z:-50 + i}, {x: 50, y: 0, z:-50 + i})
-      line2.visible = false;
-      this.grid.push(line2);
-    }
+    this.gridHelper = new THREE.GridHelper( 10, 20 );
+    this.gridHelper.visible = false;
+    this.scene.add( this.gridHelper );
   }
+
   toggleRotation(rotate){
     this.autoRotate = rotate;
   }
@@ -394,14 +376,14 @@ class Viewer {
   }
 
   toggleGrid(show){
-    for (var i = 0; i < this.grid.length; i++) {
-      this.grid[i].visible = show;
-    }
+    this.gridHelper.visible=show;
   }
 
   // create obj file with the meshes
   exportToObj(filename, callback){
     var exporter = new THREE.OBJExporter();
+
+
 		var result = exporter.parse(this.group);
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
@@ -411,13 +393,6 @@ class Viewer {
     element.click();
     document.body.removeChild(element);
     callback()
-  }
-
-  // create obj file with the meshes
-  getCurrentObj(filename, callback){
-    var exporter = new THREE.OBJExporter();
-		var result = exporter.parse(this.group);
-    return result;
   }
 
   togglePiecesVisibility(v){
@@ -617,4 +592,30 @@ function render(){
   if (viewer.autoRotate){
     viewer.centerPivot.rotation.y += 0.01;
   }
+}
+
+function adjustDimensions(data){
+  newDimensions = {}
+  var position;
+  // rotate position Vector3
+  if (data.orientation == 1){
+    position = new THREE.Vector3(data.h, data.l, data.w);
+  }
+  else if (data.orientation == 2){
+    position = new THREE.Vector3(data.l, data.h, data.w);
+  }
+  else if (data.orientation == 3){
+    position = new THREE.Vector3(data.l, data.w, data.h);
+  }
+  else if (data.orientation == 4){
+    position = new THREE.Vector3(data.w, data.l, data.h);
+  }
+  else{
+    position = new THREE.Vector3(data.w, data.h, data.l);
+  }
+
+  newDimensions.w = Math.abs(position.x);
+  newDimensions.h = Math.abs(position.y);
+  newDimensions.l = Math.abs(position.z);
+  return newDimensions;
 }

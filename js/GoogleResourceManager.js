@@ -144,30 +144,30 @@ class GoogleResourceManager {
   /*
    * get the names, filenames and ids of the avaliable textures
    */
-  getTextureList(callback){
-    var that = this;
-    this.downloadSpreadsheet(this.files['textures'], function(textureList){
-      var requestLeft = textureList.length;
-      for (var i = 0; i < textureList.length; i++) {
-        if (textureList[i].archivo.length > 1 && textureList[i].nombre.length > 1){
-          var textureIndex = i;
-          that.getFileId(textureList[i].archivo, function(id, index){
-            textureList[index].id = id;
-            requestLeft-=1;
-            if (requestLeft == 0){
-              callback(textureList);
-            }
-          }, i);
-        }
-        else{
-          textureList.splice(i,1);
-          i--;
-          requestLeft-=1;
-        }
-      }
-
-    })
-  }
+  // getTextureList(callback){
+  //   var that = this;
+  //   this.downloadSpreadsheet(this.files['textures'], function(textureList){
+  //     var requestLeft = textureList.length;
+  //     for (var i = 0; i < textureList.length; i++) {
+  //       if (textureList[i].archivo.length > 1 && textureList[i].nombre.length > 1){
+  //         var textureIndex = i;
+  //         that.getFileId(textureList[i].archivo, function(id, index){
+  //           textureList[index].id = id;
+  //           requestLeft-=1;
+  //           if (requestLeft == 0){
+  //             callback(textureList);
+  //           }
+  //         }, i);
+  //       }
+  //       else{
+  //         textureList.splice(i,1);
+  //         i--;
+  //         requestLeft-=1;
+  //       }
+  //     }
+  //
+  //   })
+  // }
 
   getTextureList(callback){
     var that = this;
@@ -184,7 +184,7 @@ class GoogleResourceManager {
           if (link.length > 0){
             output.push({
               'name': name,
-              'src': link
+              'src': link,
             })
           }
         }

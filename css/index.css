@@ -1,12 +1,57 @@
+/* PANELS */
+.panel{
+  border-radius: 1px;
+}
+
+.form-control{
+  border-radius: 1px;
+}
+
+
+.row-top{
+  height: 20vh;
+}
+
+.row-central{
+  height: 80vh;
+}
+
+.panel-top{
+  height: 19vh;
+  margin-bottom: 1vh;
+}
+
+.panel-central{
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.panel-viewer{
+  height: 80vh;
+  border-radius: 0px;
+}
+
+.panel-viewer .panel-body{
+  padding: 0px;
+}
+
+#viewer{
+  height: 100%;
+}
+
+
+#console{
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
 #piece-editor-index{
   display: none;
 }
 
 .color-box {
-  float: left;
-  width: 20px;
-  height: 20px;
-  margin: 5px;
+  width: 100%;
+  min-height: 20px;
   border: 1px solid rgba(0, 0, 0, .2);
 }
 
@@ -37,16 +82,17 @@ td {margin: 0; padding: 0;}
 }
 
 
-#viewer{
-  height: 100%;
-}
 
 .fixed-panel{
   height: 80vh;
 }
 
-.fixed-table{
-  height: 40vh;
+#piece-editor .input-group{
+  width: 100%;
+}
+
+.bootstrap-table .fixed-table-container {
+  height: 30vh;
   overflow-y: auto;
 }
 
@@ -54,4 +100,22 @@ td {margin: 0; padding: 0;}
   position: absolute;
   right: 0;
   opacity: 0.8;
+}
+
+.gi-2x{font-size: 2em;}
+.gi-3x{font-size: 3em;}
+.gi-4x{font-size: 4em;}
+.gi-5x{font-size: 5em;}
+
+
+.glyphicon-visible:hover{
+  cursor: pointer; cursor: hand;
+  -webkit-transition: all 200ms ease-in;
+  -webkit-transform: scale(1.2);
+  -ms-transition: all 200ms ease-in;
+  -ms-transform: scale(1.2);
+  -moz-transition: all 200ms ease-in;
+  -moz-transform: scale(1.2);
+  transition: all 200ms ease-in;
+  transform: scale(1.2);
 }
