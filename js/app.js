@@ -112,20 +112,32 @@ var options = {
   viewer: tool,
   pieceEditor: {
     editor : '#piece-editor',
-    index : '#piece-editor-index',
-    model : '#piece-editor-model',
-    name  : '#piece-editor-name',
-    width : '#piece-editor input[name="w"]',
-    height: '#piece-editor input[name="h"]',
-    length: '#piece-editor input[name="l"]',
-    x     : '#piece-editor input[name="x"]',
-    y     : '#piece-editor input[name="y"]',
-    z     : '#piece-editor input[name="z"]',
+    index  : '#piece-editor-index',
+    model  : '#piece-editor-model',
+    name   : '#piece-editor-name',
+    width  : '#piece-editor input[name="w"]',
+    height : '#piece-editor input[name="h"]',
+    length : '#piece-editor input[name="l"]',
+    x      : '#piece-editor input[name="x"]',
+    y      : '#piece-editor input[name="y"]',
+    z      : '#piece-editor input[name="z"]',
     visible  : '#piece-editor input[name="visible"]',
     wireframe: '#piece-editor input[name="wireframe"]',
     color    : '#piece-editor input[name="color"]',
     texture        : '#piece-editor select[name="texture"]',
     orientation    : '#piece-editor select[name="orientation"]',
+  },
+  modelEditor: {
+    editor : '#model-editor',
+    index  : '#model-editor-index',
+    model  : '#model-editor-model',
+    x      : '#model-editor input[name="x"]',
+    y      : '#model-editor input[name="y"]',
+    z      : '#model-editor input[name="z"]',
+    rx     : '#model-editor input[name="rx"]',
+    ry     : '#model-editor input[name="ry"]',
+    rz     : '#model-editor input[name="rz"]',
+    visible  : '#model-editor input[name="visible"]',
   }
 }
 
@@ -135,8 +147,6 @@ var editor = new Editor(options);
 $(document).ready(function(){
   initApp();
 })
-
-
 
 
 function loadDefaultModel(){
@@ -157,7 +167,6 @@ function fillModelsGuids(){
     select.append('<option value='+guidList[i-1]+'>MOD'+(i) +'</option>')
   }
 }
-
 
 
 function updateProgress(progress){
@@ -251,9 +260,7 @@ function loadModel(modelsToLoad){
         // se actualiza la informacion en el visor y en la tabla de piezas
         var model = {guid:this.modelGuid, tag: "MOD" + idModel, x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
 
-
         tool.addModel({tag: model.tag, pieces:parsedData});
-
         editor.appendModel(model);
 
         appData.models[model.tag] = model;

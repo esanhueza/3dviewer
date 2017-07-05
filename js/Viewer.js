@@ -309,6 +309,7 @@ class Viewer {
     var y = Math.abs(box.max.y) + Math.abs(box.min.y);
     return {x:x, y:y, z:z};
   }
+
   rotateModel(group, data){
     group.matrix = group.originalMatrix;
     this.rotateAroundWorldAxis(group, new THREE.Vector3(1,0,0), data.rx * Math.PI/180);

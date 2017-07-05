@@ -3,7 +3,9 @@ class Editor{
     this.modelsTable = $(options.modelsTable);
     this.piecesTable = $(options.piecesTable);
     this.pieceEditor = {}; // cada uno de los inputs que conforman el editor de piezas
+    this.modelEditor = {}; // cada uno de los inputs que conforman el editor de piezas
     this.initPieceEditor(options.pieceEditor);
+    this.initModelEditor(options.modelEditor);
     this.models = {};
     this.viewer = options.viewer;
     this.selectedModel = null;
@@ -16,6 +18,13 @@ class Editor{
     for (var item in items) {
       if (items.hasOwnProperty(item)) {
         this.pieceEditor[item] = $(items[item]);
+      }
+    }
+  }
+  initModelEditor(items){
+    for (var item in items) {
+      if (items.hasOwnProperty(item)) {
+        this.modelEditor[item] = $(items[item]);
       }
     }
   }
@@ -46,6 +55,7 @@ class Editor{
   // cambia el modelo actualmente seccionado
   selectModel(model){
     this.selectedModel = model;
+    this.updateModelEditor();
     this.updatePiecesTable();
   }
 
@@ -69,10 +79,24 @@ class Editor{
     this.pieceEditor.model.html('');
   }
 
+  updateModelEditor(){
+    this.modelEditor.editor.find('input, select').off('change');
+    var m = this.selectedModel;
+    this.modelEditor.index.html(m.index);
+    this.modelEditor.model.html(m.tag);
+    this.modelEditor.rx.val(m.rx);
+    this.modelEditor.ry.val(m.ry);
+    this.modelEditor.rz.val(m.rz);
+    this.modelEditor.x.val(m.x);
+    this.modelEditor.y.val(m.y);
+    this.modelEditor.z.val(m.z);
+    this.modelEditor.visible.bootstrapToggle(m.visible?'on':'off');
+    this.modelEditor.editor.find('input, select').on('change', $.proxy(this.updateModelByEditor, this));
+  }
+
   updatePieceEditor(){
     this.pieceEditor.editor.find('input, select').off('change');
     var p = this.selectedPiece;
-    this.pieceEditor.index.html(p.index);
     this.pieceEditor.name.html(p.name);
     this.pieceEditor.model.html(p.model);
     this.pieceEditor.width.val(p.w);
@@ -115,6 +139,20 @@ class Editor{
     this.models[p.model].pieces[p.index] = p;
     this.viewer.updatePiece(p);
     this.piecesTable.bootstrapTable('updateByUniqueId', p.index, p);
+  }
+
+  updateModelByEditor(){
+    var m = this.selectedModel;
+    m.rx = parseInt(this.modelEditor.rx.val());
+    m.ry = parseInt(this.modelEditor.ry.val());
+    m.rz = parseInt(this.modelEditor.rz.val());
+    m.x  = parseInt(this.modelEditor.x.val());
+    m.y  = parseInt(this.modelEditor.y.val());
+    m.z  = parseInt(this.modelEditor.z.val());
+    m.visible = this.modelEditor.visible.is(':checked');
+    this.models[m.tag] = m;
+    this.modelsTable.bootstrapTable('updateByUniqueId', m.guid, m);
+    this.viewer.updateModel(m);
   }
 
   // // Cambia las piezas que son mostradas en la tabla de piezas.
