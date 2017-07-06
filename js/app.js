@@ -88,6 +88,7 @@ function initGoogleApi(){
  * inicializa la aplicacion cuando la informacion externa fue cargada
  */
 function initApp(){
+  updateProgress(100);
   initPiecesTable();
   initModelsTable();
   fillModelsGuids();
@@ -194,20 +195,6 @@ function loadModel(modelsToLoad){
   for (var i = 0; i < modelsToLoad.length; i++) {
     var guid = modelsToLoad[i];
 
-    // first look if the model is already loaded
-    for (var k = 0; k < rows.length; k++) {
-      var e = $(rows[k]);
-      // if is already loaded, remove it and load it again
-      if (e.attr("data-guid") == guid){
-        var tag = "MOD" + (guidList.indexOf(guid)+1);
-
-        tool.removeModel(tag);
-        e.remove();
-        $('#'+tag+'Tab').remove();
-        $('#nav-'+tag).remove();
-      }
-    }
-
     $.get({
       modelGuid: guid,
       modelIndex: i,
@@ -258,9 +245,9 @@ function loadModel(modelsToLoad){
 
 
         // se actualiza la informacion en el visor y en la tabla de piezas
-        var model = {guid:this.modelGuid, tag: "MOD" + idModel, x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
+        var model = {pieces:parsedData, guid:this.modelGuid, tag: "MOD" + idModel, x:0, y:0, z:0, rx:0, ry:0,rz:0,visible:true};
 
-        tool.addModel({tag: model.tag, pieces:parsedData});
+        //tool.addModel({tag: model.tag, });
         editor.appendModel(model);
 
         appData.models[model.tag] = model;
@@ -358,55 +345,6 @@ function updatePieceOnList(data){
   $('table[data-model="'+data.model+'"]').bootstrapTable('updateRow', data.index, data);
 }
 
-function cleanPieceEditor(){
-  $('#piece-editor')[0].reset();
-  $("#piece-editor-index").html("");
-  $("#piece-editor-model").html("");
-}
-
-// carga las piezas del modelo a la tabla de piezas
-function setModelOnPiecesTable(model){
-
-  // save the modified data of the model
-  var oldModelTag = $('#table-pieces').attr("data-model");
-  if (oldModelTag){
-    var oldData  = $('#table-pieces').bootstrapTable("getData");
-    appData.models[oldModelTag].pieces = oldData;
-  }
-  if (oldModelTag == model.tag){
-    return;
-  }
-  // agrega los datos del nuevo modelo
-  $('#table-pieces').attr("data-model", model.tag);
-  $('#table-pieces').bootstrapTable("load", model.pieces);
-
-  // limpia el editor de piezas
-  cleanPieceEditor();
-}
-
-/* obtiene los datos desde el editor de piezas */
-function getPieceEditorData(){
-  var index   = $("#piece-editor-index").html();
-  var model   = $("#piece-editor-model").html();
-  var data = $('table[data-model="'+model+'"]').bootstrapTable('getRowByUniqueId', index);
-  var form = $('#piece-editor');
-
-  data.w = parseInt(form.find('input[name="w"]').val());
-  data.h = parseInt(form.find('input[name="h"]').val());
-  data.l = parseInt(form.find('input[name="l"]').val());
-  data.x = parseInt(form.find('input[name="x"]').val());
-  data.y = parseInt(form.find('input[name="y"]').val());
-  data.z = parseInt(form.find('input[name="z"]').val());
-  data.color = form.find('input[name="color"]').val();
-  data.visible     = form.find('input[name="visible"]').is(':checked');
-  data.wireframe   = form.find('input[name="wireframe"]').is(':checked');
-  data.orientation = form.find('select[name="orientation"]').val();
-
-  data.texture = appData.textures[parseInt(form.find('select[name="texture"] option:selected').attr('data-index'))];
-
-  return data;
-}
-
 
 /* obtiene la informacion completa de la textura segun su nombre */
 function getTextureByName(name){
@@ -478,6 +416,7 @@ function initModelsTable(){
     onClickRow: onModelsRowClick,
     classes: 'table table-no-bordered table-hover',
     uniqueId: 'guid',
+    sortName: 'tag',
     columns: [{
         field: 'guid',
         title: '#',

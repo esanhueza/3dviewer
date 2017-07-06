@@ -32,10 +32,20 @@ class Editor{
   // agrega un nuevo modelo a la tabla de modelos.
   appendModel(model){
     // TODO: Check model
-    if (!this.models[model.tag])
+    if (!this.models[model.tag]){
       this.modelsTable.bootstrapTable('append', model);
-    else
-      this.modelsTable.bootstrapTable('updateByUniqueId', model.guid, model);
+    }
+    else{
+      this.modelsTable.bootstrapTable('removeByUniqueId', model.guid);
+      this.viewer.removeModel(model.tag);
+      this.modelsTable.bootstrapTable('append', model);
+
+      if (this.selectedModel && this.selectedModel.tag == model.tag){
+        this.piecesTable.bootstrapTable('load', []);
+        this.cleanPieceEditor();
+      }
+    }
+    this.viewer.addModel(model);
     this.models[model.tag] = model;
   }
 
@@ -47,6 +57,7 @@ class Editor{
 
   // actualiza las piezas del modelo que se muestra en la tabla de piezas.
   updatePiecesTable(){
+    console.log("updatePiecesTable", this.selectedModel.pieces);
     if (this.selectedModel){
         this.piecesTable.bootstrapTable('load', this.selectedModel.pieces);
     }
@@ -77,6 +88,7 @@ class Editor{
     this.pieceEditor.editor[0].reset();
     this.pieceEditor.index.html('');
     this.pieceEditor.model.html('');
+    this.pieceEditor.name.html('');
   }
 
   updateModelEditor(){
@@ -132,7 +144,7 @@ class Editor{
     p.z = parseInt(this.pieceEditor.z.val());
     p.visible     = this.pieceEditor.visible.is(':checked');
     p.wireframe   = this.pieceEditor.wireframe.is(':checked');
-    p.color       = this.pieceEditor.color.val();
+    p.color       = this.pieceEditor.color.val().replace('#', '0x');
     p.orientation = this.pieceEditor.orientation.val();
     p.texture     = this.loadedTextures[this.pieceEditor.texture.find(':selected').attr('data-index')];
 
