@@ -20,7 +20,7 @@ class Viewer {
     this.models = [];
     this.centerPivot = new THREE.Object3D();
 
-    this.group = new THREE.Group();
+    this.group  = new THREE.Group();
     this.group.castShadow = true;
     this.group.receiveShadow = true;
     this.group.scale.set(0.001, 0.001, 0.001);
@@ -178,6 +178,7 @@ class Viewer {
     };
 
     group.originalMatrix = group.matrix;
+    this.createLabel(group);
     return group;
   }
 
@@ -189,48 +190,7 @@ class Viewer {
     var dimensions = adjustDimensions(data);
     var geometry = new THREE.BoxGeometry( dimensions.w, dimensions.h, dimensions.l );
 
-    geometry.faceVertexUvs[0][8][0].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][8][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][9][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][8][2].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][9][1].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][9][2].x = dimensions.w / this.textureSize.width;
-
-    geometry.faceVertexUvs[0][10][0].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][10][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][10][2].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][11][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][11][1].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][11][2].x = dimensions.w / this.textureSize.width;
-
-    geometry.faceVertexUvs[0][4][0].y = dimensions.l / this.textureSize.height;
-    geometry.faceVertexUvs[0][4][2].y = dimensions.l / this.textureSize.height;
-    geometry.faceVertexUvs[0][4][2].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][5][2].y = dimensions.l / this.textureSize.height;
-    geometry.faceVertexUvs[0][5][1].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][5][2].x = dimensions.w / this.textureSize.width;
-
-    geometry.faceVertexUvs[0][6][0].y = dimensions.l / this.textureSize.height;
-    geometry.faceVertexUvs[0][6][2].y = dimensions.l / this.textureSize.height;
-    geometry.faceVertexUvs[0][6][2].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][7][2].y = dimensions.l / this.textureSize.height;
-    geometry.faceVertexUvs[0][7][1].x = dimensions.w / this.textureSize.width;
-    geometry.faceVertexUvs[0][7][2].x = dimensions.w / this.textureSize.width;
-
-
-    geometry.faceVertexUvs[0][0][0].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][0][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][0][2].x = dimensions.l / this.textureSize.width;
-    geometry.faceVertexUvs[0][1][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][1][1].x = dimensions.l / this.textureSize.width;
-    geometry.faceVertexUvs[0][1][2].x = dimensions.l / this.textureSize.width;
-
-    geometry.faceVertexUvs[0][2][0].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][2][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][2][2].x = dimensions.l / this.textureSize.width;
-    geometry.faceVertexUvs[0][3][2].y = dimensions.h / this.textureSize.height;
-    geometry.faceVertexUvs[0][3][1].x = dimensions.l / this.textureSize.width;
-    geometry.faceVertexUvs[0][3][2].x = dimensions.l / this.textureSize.width;
+    setTextureToGeometry(geometry, dimensions, this.textureSize);
 
 
     var pieceMesh = new THREE.Mesh(geometry, this.materials['wood'].clone());
@@ -300,6 +260,7 @@ class Viewer {
     model.position.z = d.z;
     model.visible = d.visible;
     this.rotateModel(model, d);
+    this.updateLabel(model);
   }
 
   getModelSize(model){
@@ -406,7 +367,6 @@ class Viewer {
       }
     }
   }
-
 
   exportGIF(filename, onProgress){
     if (location.origin == 'file://'){
@@ -582,6 +542,62 @@ class Viewer {
     }
     return toLoad
   }
+
+  /* Dibuja texto sobre los modelos para identificarlos. */
+  createLabel(model){
+
+
+    let sprite = new THREE.TextSprite({
+      textSize: 500,
+      redrawInterval: 1000,
+      texture: {
+        text: model.tag,
+        fontFamily: 'Arial, Helvetica, sans-serif',
+      },
+      material: {
+        color: 0x000000,
+      },
+    });
+
+    sprite.visible = false;
+
+
+    let box = new THREE.Box3().setFromObject( model );
+    let center = box.getCenter();
+
+    sprite.position.set(
+      center.x,
+      model.position.y + box.max.y  + 500,
+      center.z
+    );
+    model.add(sprite);
+    model.label = sprite;
+
+  }
+
+  /* muestra / oculta los nombres sobre los modelos */
+  showLabels(show){
+    for (var i = 0; i < this.group.children.length; i++) {
+      this.group.children[i].label.visible = show;
+    }
+  }
+
+  /* actuliza el label de un modelo especifico */
+  updateLabel(model){
+    let label = model.label;
+    let box = new THREE.Box3().setFromObject( model );
+    let center = box.getCenter();
+    let size = box.getSize();
+
+    label.position.set(
+      center.x + size.x/2 * 1000,
+      center.y + size.y * 1000 + 500,
+      center.z + size.z/2 * 1000
+    );
+
+    console.log(size);
+  }
+
 }
 
 var viewer = new Viewer();
@@ -619,4 +635,50 @@ function adjustDimensions(data){
   newDimensions.h = Math.abs(position.y);
   newDimensions.l = Math.abs(position.z);
   return newDimensions;
+}
+
+
+function setTextureToGeometry(geometry, dimensions, textureSize){
+  geometry.faceVertexUvs[0][8][0].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][8][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][9][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][8][2].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][9][1].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][9][2].x = dimensions.w / textureSize.width;
+
+  geometry.faceVertexUvs[0][10][0].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][10][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][10][2].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][11][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][11][1].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][11][2].x = dimensions.w / textureSize.width;
+
+  geometry.faceVertexUvs[0][4][0].y = dimensions.l / textureSize.height;
+  geometry.faceVertexUvs[0][4][2].y = dimensions.l / textureSize.height;
+  geometry.faceVertexUvs[0][4][2].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][5][2].y = dimensions.l / textureSize.height;
+  geometry.faceVertexUvs[0][5][1].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][5][2].x = dimensions.w / textureSize.width;
+
+  geometry.faceVertexUvs[0][6][0].y = dimensions.l / textureSize.height;
+  geometry.faceVertexUvs[0][6][2].y = dimensions.l / textureSize.height;
+  geometry.faceVertexUvs[0][6][2].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][7][2].y = dimensions.l / textureSize.height;
+  geometry.faceVertexUvs[0][7][1].x = dimensions.w / textureSize.width;
+  geometry.faceVertexUvs[0][7][2].x = dimensions.w / textureSize.width;
+
+
+  geometry.faceVertexUvs[0][0][0].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][0][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][0][2].x = dimensions.l / textureSize.width;
+  geometry.faceVertexUvs[0][1][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][1][1].x = dimensions.l / textureSize.width;
+  geometry.faceVertexUvs[0][1][2].x = dimensions.l / textureSize.width;
+
+  geometry.faceVertexUvs[0][2][0].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][2][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][2][2].x = dimensions.l / textureSize.width;
+  geometry.faceVertexUvs[0][3][2].y = dimensions.h / textureSize.height;
+  geometry.faceVertexUvs[0][3][1].x = dimensions.l / textureSize.width;
+  geometry.faceVertexUvs[0][3][2].x = dimensions.l / textureSize.width;
 }

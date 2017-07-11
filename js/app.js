@@ -111,6 +111,11 @@ var options = {
   modelsTable: '#table-models',
   piecesTable: '#table-pieces',
   viewer: tool,
+  viewerOptions: {
+    labels   : '#input-labels',
+    grid     : '#grid-check',
+    rotation : '#rotate-check',
+  },
   pieceEditor: {
     editor : '#piece-editor',
     index  : '#piece-editor-index',

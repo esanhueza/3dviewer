@@ -1,18 +1,27 @@
 class Editor{
   constructor(options) {
-    this.modelsTable = $(options.modelsTable);
-    this.piecesTable = $(options.piecesTable);
-    this.pieceEditor = {}; // cada uno de los inputs que conforman el editor de piezas
-    this.modelEditor = {}; // cada uno de los inputs que conforman el editor de piezas
+    this.modelsTable   = $(options.modelsTable);
+    this.piecesTable   = $(options.piecesTable);
+    this.pieceEditor   = {}; // cada uno de los inputs que conforman el editor de piezas
+    this.modelEditor   = {}; // cada uno de los inputs que conforman el editor de piezas
+    this.viewerOptions = {}; // cada uno de los inputs que conforman las opciones del visor 3D
     this.initPieceEditor(options.pieceEditor);
     this.initModelEditor(options.modelEditor);
+    this.initViewerOptions(options.viewerOptions);
     this.models = {};
     this.viewer = options.viewer;
-    this.selectedModel = null;
-    this.selectedPiece = null;
+    this.selectedModel  = null;
+    this.selectedPiece  = null;
     this.loadedTextures = null;
   }
 
+  initViewerOptions(items){
+    for (var item in items) {
+      if (items.hasOwnProperty(item)) {
+        this.viewerOptions[item] = $(items[item]);
+      }
+    }
+  }
 
   initPieceEditor(items){
     for (var item in items) {
@@ -21,6 +30,7 @@ class Editor{
       }
     }
   }
+
   initModelEditor(items){
     for (var item in items) {
       if (items.hasOwnProperty(item)) {
@@ -167,12 +177,13 @@ class Editor{
     this.viewer.updateModel(m);
   }
 
-  // // Cambia las piezas que son mostradas en la tabla de piezas.
-  // setModelOnPieceEditor(model){
-  //   // si el modelo es el mismo que ya esta en la tabla, se omite.
-  //   if (this.pieceEditor.model != model){
-  //     this.pieceEditor.clean();
-  //     this.pieceEditor.model = model;
-  //   }
-  // }
+  updateViewer(){
+    let showLabels = this.viewerOptions.labels.is(':checked');
+    let showGrid   = this.viewerOptions.grid.is(':checked');
+    let rotate     = this.viewerOptions.rotation.is(':checked');
+    this.viewer.showLabels(showLabels);
+    this.viewer.toggleGrid(showGrid);
+    this.viewer.toggleRotation(rotate);
+  }
+
 }

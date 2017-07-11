@@ -8,28 +8,29 @@
 }
 
 
-.row-top{
-  height: 20vh;
+/* Large desktop */
+@media (min-width: 1200px) {
+    .row-central{
+      height: 80vh;
+    }
+
+    .panel-top{
+      height: 15vh;
+      margin-bottom: 1vh;
+    }
+
+    .panel-central{
+      height: 80vh;
+      overflow-y: auto;
+    }
+
+    .panel-viewer{
+      height: 80vh;
+      border-radius: 0px;
+    }
+
 }
 
-.row-central{
-  height: 80vh;
-}
-
-.panel-top{
-  height: 19vh;
-  margin-bottom: 1vh;
-}
-
-.panel-central{
-  height: 80vh;
-  overflow-y: auto;
-}
-
-.panel-viewer{
-  height: 80vh;
-  border-radius: 0px;
-}
 
 .panel-viewer .panel-body{
   padding: 0px;
