@@ -638,7 +638,7 @@ class Viewer {
 
     var newCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 10 );
     this.scene.add(newCamera);
-    this.camera = newCamera;
+    // this.camera = newCamera;
 
     newCamera.position.set(modelCenter.x, modelCenter.y, modelBox.max.z);
     newCamera.lookAt(modelCenter)

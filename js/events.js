@@ -21,7 +21,7 @@ $('#input-light-bias').on('change', function (evt){
 });
 
 $('#btn-export-pattern').on('click', function(){
-  editor.exportPattern(filename);
+  editor.exportPattern();
 });
 
 
