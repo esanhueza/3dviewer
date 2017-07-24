@@ -567,6 +567,7 @@ class Viewer {
       visible: false,
     });
 
+    this.labels.add(label);
     model.label = label;
   }
 
