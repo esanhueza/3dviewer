@@ -1,13 +1,12 @@
-
-
 class Room {
   constructor(w, h, l, params) {
     this.options = params;
     this.avaliableObjects = [];
     this.scene = new THREE.Group();
-    this.scene.scale.set(0.001, 0.001, 0.001);
+    this.scaleFactor = 0.1;
+    this.scene.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
     this.objects = [];
-    console.log(this.options.wallColor);
+
     this.materials = {
       'wall': new THREE.MeshPhongMaterial( {
         color: this.options.wallColor || 0xaaaaaa,
@@ -31,7 +30,6 @@ class Room {
     }
 
 
-
     var geometry  = new THREE.BoxGeometry( 1,1,1 );
     this.mesh = new THREE.Mesh(geometry, [
       this.materials['wall'],
@@ -50,18 +48,8 @@ class Room {
     this.mesh.translateY(h/2);
     this.mesh.translateZ(l/2);
 
-
     this.scene.add(this.mesh)
-    // this.light = new THREE.PointLight( 0xffffff, 1 );
-    this.light = new THREE.DirectionalLight( 0xFFFFFF );
-    this.light.castShadow = true;
-    this.light.position.set( w/2, h*.9, l*.9 );
-
-    this.light.shadow.camera.far = 10000;
-
-    this.scene.add( this.light );
-
-    this.loadTextures()
+    this.loadTextures();
   }
 
 
@@ -101,7 +89,6 @@ class Room {
     obj.visible = data.visible;
   }
 
-
   loadObject(data){
     var search = this.avaliableObjects.filter(function(obj){
         return obj.name == data.objectName;
@@ -111,14 +98,13 @@ class Room {
       return
     }
     var newObject = search[0];
-    var loader = new THREE.OBJLoader( );
+    var loader = new THREE.OBJLoader();
     var that = this;
 		loader.load( 'assets/' + newObject.filename , function ( object ) {
-
       that.scene.add(object);
       that.objects.push(object);
       that.updateData(object, data);
-    })
+    });
   }
 
 
@@ -164,7 +150,7 @@ class Room {
   }
 
   getMesh(){
-    return this.scene
+    return this.scene;
   }
 
   updateMaterials(){
@@ -182,11 +168,12 @@ class Room {
       this.mesh.material[i].map.needsUpdate = true;
     }
   }
+
+
   setLight(data){
     this.light.intensity = data.intensity;
     this.light.color.setHex(data.color);
   }
-
 }
 
 

@@ -16,9 +16,15 @@ $('#edge-color').on('change', function (){
     tool.setEdgeColor(this.value.replace('#','0x'));
 });
 
-$('#btn-export-img-dimensions').on('click', function(){
-  tool.getDimensionsIMG.call(tool);
+$('#input-light-bias').on('change', function (evt){
+    tool.room.light.shadow.bias = $(evt.currentTarget).val() ;
 });
+
+$('#btn-export-pattern').on('click', function(){
+  editor.exportPattern(filename);
+});
+
+
 
 $('#btn-export').on('click', function(){
   $("#models-load-tab .spinner").show();
@@ -36,7 +42,6 @@ $('#btn-google-export').on('click', function(){
 
 $('#btn-export-img').on('click', function(){
   var img = tool.exportIMG.call(tool, filename);
-  // resourceManager.uploadFile(filename, 'image/jpeg', img);
 });
 $('#btn-google-export-img').on('click', function(){
   var img = tool.getCurrentIMG.call(tool);

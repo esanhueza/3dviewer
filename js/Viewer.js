@@ -16,14 +16,16 @@ class Viewer {
     this.raycaster = new THREE.Raycaster();
     this.gridHelper = null;
     this.meshes = [];
-    this.wireframes = [];
     this.models = [];
     this.centerPivot = new THREE.Object3D();
 
     this.group  = new THREE.Group();
+    this.labels = new THREE.Group();
+    this.lights = new THREE.Group();
     this.group.castShadow = true;
     this.group.receiveShadow = true;
-    this.group.scale.set(0.001, 0.001, 0.001);
+    this.scaleFactor = 0.1;
+    this.group.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
 
     this.autoRotate = false;
     this.fixCamera = false;
@@ -57,15 +59,18 @@ class Viewer {
     this.container = container;
     this.renderer.setSize( container.offsetWidth, container.offsetHeight );
     this.container.appendChild( this.renderer.domElement );
-    this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 0.1, 20 );
+    this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 1, 10000 );
+
     // Set camera position
-    this.camera.position.y = 6;
-    this.camera.position.z = 8;
+    this.camera.position.y = 6000 * this.scaleFactor;
+    this.camera.position.z = 8000 * this.scaleFactor;
     //this.camera.rotation.x = -0.4;
     // Object by which the camera ratates around
     this.centerPivot.add( this.camera )
     this.scene.add( this.centerPivot );
     this.scene.add( this.group );
+    this.scene.add( this.labels );
+    this.scene.add( this.lights );
     this.createGrid();
     render();
 
@@ -114,6 +119,7 @@ class Viewer {
     this.room = new Room(w,h,l, options);
     this.room.avaliableObjects = this.objects;
     this.scene.add(this.room.getMesh());
+    this.addLight(w*this.scaleFactor*0.9, h*this.scaleFactor*0.9, l*this.scaleFactor*0.9);
     return this.room;
   }
 
@@ -125,6 +131,15 @@ class Viewer {
       this.room.setColors(data.color);
       this.room.setLight(data.light);
     }
+  }
+
+  addLight(x,y,z){
+    var light = new THREE.PointLight(0xffffff, 1);
+    var helper = new THREE.PointLightHelper(light, 1000 * this.scaleFactor);
+    light.position.set(x, y, z);
+    this.lights.add(light);
+    this.lights.add(helper);
+
   }
 
   createModels(data){
@@ -171,6 +186,7 @@ class Viewer {
     for (var i = 0; i < data.pieces.length; i++) {
       var result = this.createPiece(data.pieces[i]);
       result.piece.dataIndex     = i;
+      result.piece.userData = data.pieces[i];
       result.wireframe.dataIndex = i;
 
       group.add(result.piece);
@@ -178,7 +194,7 @@ class Viewer {
     };
 
     group.originalMatrix = group.matrix;
-    this.createLabel(group);
+    this.createModelLabel(group);
     return group;
   }
 
@@ -191,7 +207,6 @@ class Viewer {
     var geometry = new THREE.BoxGeometry( dimensions.w, dimensions.h, dimensions.l );
 
     setTextureToGeometry(geometry, dimensions, this.textureSize);
-
 
     var pieceMesh = new THREE.Mesh(geometry, this.materials['wood'].clone());
 
@@ -237,9 +252,9 @@ class Viewer {
       }
     }
 
-    result.piece.visible = data.visible;
-    result.wireframe.visible = data.visible && data.wireframe;
-    result.piece.dataIndex = data.index;
+    result.piece.visible       = data.visible;
+    result.wireframe.visible   = data.visible && data.wireframe;
+    result.piece.dataIndex     = data.index;
     result.wireframe.dataIndex = data.index;
 
     model.add(result.piece);
@@ -260,16 +275,10 @@ class Viewer {
     model.position.z = d.z;
     model.visible = d.visible;
     this.rotateModel(model, d);
-    this.updateLabel(model);
+    this.updateModelLabel(model);
   }
 
-  getModelSize(model){
-    var box = new THREE.Box3().setFromObject( model );
-    var z = Math.abs(box.max.z) + Math.abs(box.min.z);
-    var x = Math.abs(box.max.x) + Math.abs(box.min.x);
-    var y = Math.abs(box.max.y) + Math.abs(box.min.y);
-    return {x:x, y:y, z:z};
-  }
+
 
   rotateModel(group, data){
     group.matrix = group.originalMatrix;
@@ -313,7 +322,7 @@ class Viewer {
   }
 
   createGrid(){
-    this.gridHelper = new THREE.GridHelper( 10, 20 );
+    this.gridHelper = new THREE.GridHelper( 2000, 20 );
     this.gridHelper.visible = false;
     this.scene.add( this.gridHelper );
   }
@@ -345,7 +354,6 @@ class Viewer {
   exportToObj(filename, callback){
     var exporter = new THREE.OBJExporter();
 
-
 		var result = exporter.parse(this.group);
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
@@ -354,7 +362,7 @@ class Viewer {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    callback()
+    callback();
   }
 
   togglePiecesVisibility(v){
@@ -374,7 +382,6 @@ class Viewer {
       this.exportGIF2(filename, onProgress);
       return;
     }
-    console.info("Creando GIF con metodo principal.");
     var steps = 8;
     var exporter = new GIF({
       workers: 2,
@@ -544,35 +551,23 @@ class Viewer {
   }
 
   /* Dibuja texto sobre los modelos para identificarlos. */
-  createLabel(model){
-
-
-    let sprite = new THREE.TextSprite({
-      textSize: 500,
-      redrawInterval: 1000,
-      texture: {
-        text: model.tag,
-        fontFamily: 'Arial, Helvetica, sans-serif',
-      },
-      material: {
-        color: 0x000000,
-      },
-    });
-
-    sprite.visible = false;
-
-
+  createModelLabel(model){
     let box = new THREE.Box3().setFromObject( model );
     let center = box.getCenter();
-
-    sprite.position.set(
-      center.x,
-      model.position.y + box.max.y  + 500,
-      center.z
+    var position = new THREE.Vector3(
+      center.x * this.scaleFactor,
+      model.position.y + (box.max.y + 500) * this.scaleFactor,
+      center.z * this.scaleFactor
     );
-    model.add(sprite);
-    model.label = sprite;
+    var label = createLabel({
+      text: model.tag,
+      redrawInterval : 1000,
+      size: 50,
+      position: position,
+      visible: false,
+    });
 
+    model.label = label;
   }
 
   /* muestra / oculta los nombres sobre los modelos */
@@ -582,20 +577,89 @@ class Viewer {
     }
   }
 
-  /* actuliza el label de un modelo especifico */
-  updateLabel(model){
+  /* actualiza el label de un modelo especifico */
+  updateModelLabel(model){
     let label = model.label;
     let box = new THREE.Box3().setFromObject( model );
     let center = box.getCenter();
     let size = box.getSize();
-
     label.position.set(
-      center.x + size.x/2 * 1000,
-      center.y + size.y * 1000 + 500,
-      center.z + size.z/2 * 1000
+      center.x,
+      box.max.y + 500 * this.scaleFactor,
+      center.z
     );
+  }
 
-    console.log(size);
+  getPatternImg(model){
+    var model  = this.findModelByTag(model.tag);
+    var tmpLabels = new THREE.Group();
+    this.scene.add(tmpLabels);
+
+    let modelBox    = new THREE.Box3().setFromObject( model );
+    let modelCenter = modelBox.getCenter();
+    let modelSize   = modelBox.getSize();
+
+    for (var i = 0; i < model.children.length; i++) {
+      var piece = model.children[i];
+      if (piece.pieceType == "wireframe") continue;
+
+      let box    = new THREE.Box3().setFromObject( piece );
+      let center = box.getCenter();
+      let size   = box.getSize();
+
+      let position = new THREE.Vector3(
+        center.x,
+        box.max.y + 4,
+        box.max.z
+      );
+
+      var label = createLabel({
+        text: piece.userData.pattern.frontWidth,
+        size: 8,
+        redrawInterval : 0,
+        position: position,
+        visible: true,
+      });
+
+      tmpLabels.add(label);
+    }
+
+    var aspectRatio = this.container.offsetWidth / this.container.offsetHeight;
+    var height, width = 0;
+    if (modelSize.z > modelSize.y){
+      width  = modelSize.z * 1.2;
+      height = width / aspectRatio;
+    }
+    else{
+      height = modelSize.y * 1.2;
+      width  = height * aspectRatio;
+    }
+
+    var newCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 10 );
+    this.scene.add(newCamera);
+    this.camera = newCamera;
+
+    newCamera.position.set(modelCenter.x, modelCenter.y, modelBox.max.z);
+    newCamera.lookAt(modelCenter)
+
+    this.renderer.render( this.scene, newCamera );
+
+    this.exportIMG( model.tag );
+
+    this.scene.remove(newCamera);
+    this.scene.remove(tmpLabels);
+
+  }
+
+  showOnlyWireframe(model){
+    var model  = this.findModelByTag(model.tag);
+    if (!model) return;
+    for (var i = 0; i < model.children.length; i++) {
+      if (model.children[i].pieceType == "wireframe")
+        model.children[i].visible = true;
+      else
+        model.children[i].visible = false;
+    }
   }
 
 }
@@ -637,6 +701,23 @@ function adjustDimensions(data){
   return newDimensions;
 }
 
+/* Crea un sprite */
+function createLabel(params){
+  let sprite = new THREE.TextSprite({
+    textSize: params.size,
+    redrawInterval: params.redrawInterval,
+    texture: {
+      text: params.text,
+      fontFamily: params.font || 'Arial, Helvetica, sans-serif',
+    },
+    material: {
+      color: 0x000000,
+    },
+  });
+  sprite.visible = params.visible;
+  sprite.position.copy(params.position);
+  return sprite;
+}
 
 function setTextureToGeometry(geometry, dimensions, textureSize){
   geometry.faceVertexUvs[0][8][0].y = dimensions.h / textureSize.height;

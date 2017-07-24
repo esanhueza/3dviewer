@@ -67,7 +67,6 @@ class Editor{
 
   // actualiza las piezas del modelo que se muestra en la tabla de piezas.
   updatePiecesTable(){
-    console.log("updatePiecesTable", this.selectedModel.pieces);
     if (this.selectedModel){
         this.piecesTable.bootstrapTable('load', this.selectedModel.pieces);
     }
@@ -186,4 +185,11 @@ class Editor{
     this.viewer.toggleRotation(rotate);
   }
 
+  exportPattern(){
+    console.log("Exportando plano 2D.");
+    this.viewer.showLabels(false);
+    // this.viewer.showOnlyWireframe(this.selectedModel);
+    this.viewer.getPatternImg(this.selectedModel);
+    // this.viewer.showLabels(true);
+  }
 }

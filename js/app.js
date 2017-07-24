@@ -228,6 +228,9 @@ function loadModel(modelsToLoad){
               y: parseFloat(obj.gsx$i.$t.replace(',', '.')),
               x: parseFloat(obj.gsx$j.$t.replace(',', '.')),
               z: parseFloat(obj.gsx$k.$t.replace(',', '.')),
+              pattern: {
+                frontWidth : parseFloat(obj.gsx$m.$t.replace(',', '.')),
+              },
               model: "MOD"+idModel,
           }
           if (pieceData.w == 0 || pieceData.h == 0 || pieceData.l == 0){
