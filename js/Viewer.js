@@ -19,12 +19,14 @@ class Viewer {
     this.models = [];
     this.centerPivot = new THREE.Object3D();
 
-    this.group  = new THREE.Group();
-    this.labels = new THREE.Group();
-    this.lights = new THREE.Group();
+    this.group           = new THREE.Group();
+    this.labels          = new THREE.Group();
+    this.dimensionLabels = new THREE.Group();
+    this.lights          = new THREE.Group();
     this.group.castShadow = true;
     this.group.receiveShadow = true;
     this.scaleFactor = 0.1;
+    this.perspectiveCamera = null;
     this.group.scale.set(this.scaleFactor, this.scaleFactor, this.scaleFactor);
 
     this.autoRotate = false;
@@ -60,6 +62,7 @@ class Viewer {
     this.renderer.setSize( container.offsetWidth, container.offsetHeight );
     this.container.appendChild( this.renderer.domElement );
     this.camera = new THREE.PerspectiveCamera( 75, container.offsetWidth / container.offsetHeight, 1, 10000 );
+    this.perspectiveCamera = this.camera;
 
     // Set camera position
     this.camera.position.y = 6000 * this.scaleFactor;
@@ -71,6 +74,7 @@ class Viewer {
     this.scene.add( this.group );
     this.scene.add( this.labels );
     this.scene.add( this.lights );
+    this.scene.add( this.dimensionLabels );
     this.createGrid();
     render();
 
@@ -591,7 +595,54 @@ class Viewer {
     );
   }
 
+  showDimensions(show, model){
+    this.scene.remove(this.dimensionLabels);
+    this.dimensionLabels = new THREE.Group();
+    this.scene.add(this.dimensionLabels);
+    if (!show){
+      console.log("Ocultar dimensiones.");
+      return;
+    }
+    if (model == null) {
+      alert("Debe seleccionar un modelo.");
+      return;
+    }
+
+    var model  = this.findModelByTag(model.tag);
+    let modelBox    = new THREE.Box3().setFromObject( model );
+    let modelCenter = modelBox.getCenter();
+    let modelSize   = modelBox.getSize();
+
+    for (var i = 0; i < model.children.length; i++) {
+      var piece = model.children[i];
+      if (piece.pieceType == "wireframe") continue;
+
+      let box    = new THREE.Box3().setFromObject( piece );
+      let center = box.getCenter();
+      let size   = box.getSize();
+
+      let position = new THREE.Vector3(
+        center.x,
+        box.max.y + 4,
+        box.max.z
+      );
+
+      var label = createLabel({
+        text: piece.userData.pattern.frontWidth,
+        size: 8,
+        redrawInterval : 0,
+        position: position,
+        visible: true,
+      });
+      this.dimensionLabels.add(label);
+    }
+  }
+
   getPatternImg(model){
+    if (model == null) {
+      alert("Debe seleccionar un modelo.");
+      return;
+    }
     var model  = this.findModelByTag(model.tag);
     var tmpLabels = new THREE.Group();
     this.scene.add(tmpLabels);
@@ -636,7 +687,7 @@ class Viewer {
       width  = height * aspectRatio;
     }
 
-    var newCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 10 );
+    var newCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, modelSize.z );
     this.scene.add(newCamera);
     // this.camera = newCamera;
 
@@ -649,7 +700,36 @@ class Viewer {
 
     this.scene.remove(newCamera);
     this.scene.remove(tmpLabels);
+  }
 
+  clearOrthographicCamera(){
+    this.scene.remove(this.camera);
+    this.camera = this.perspectiveCamera;
+  }
+
+  cameraOrthographicFront(model){
+    var model  = this.findModelByTag(model.tag);
+    let modelBox    = new THREE.Box3().setFromObject( model );
+    let modelCenter = modelBox.getCenter();
+    let modelSize   = modelBox.getSize();
+
+    var aspectRatio = this.container.offsetWidth / this.container.offsetHeight;
+    var height, width = 0;
+    if (modelSize.z > modelSize.y){
+      width  = modelSize.z * 1.2;
+      height = width / aspectRatio;
+    }
+    else{
+      height = modelSize.y * 1.2;
+      width  = height * aspectRatio;
+    }
+
+    var newCamera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, modelSize.z );
+    this.scene.add(newCamera);
+
+    newCamera.position.set(modelCenter.x, modelCenter.y, modelBox.max.z);
+    newCamera.lookAt(modelCenter)
+    this.camera = newCamera;
   }
 
   showOnlyWireframe(model){
@@ -748,7 +828,6 @@ function setTextureToGeometry(geometry, dimensions, textureSize){
   geometry.faceVertexUvs[0][7][2].y = dimensions.l / textureSize.height;
   geometry.faceVertexUvs[0][7][1].x = dimensions.w / textureSize.width;
   geometry.faceVertexUvs[0][7][2].x = dimensions.w / textureSize.width;
-
 
   geometry.faceVertexUvs[0][0][0].y = dimensions.h / textureSize.height;
   geometry.faceVertexUvs[0][0][2].y = dimensions.h / textureSize.height;

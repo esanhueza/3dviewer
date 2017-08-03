@@ -1,3 +1,11 @@
+
+
+/* MENU BAR*/
+#menu-bar {
+  margin-bottom: 0px;
+}
+
+
 /* PANELS */
 .panel{
   border-radius: 1px;
@@ -15,8 +23,8 @@
     }
 
     .panel-top{
-      height: 15vh;
       margin-bottom: 1vh;
+      padding: 6px 6px;
     }
 
     .panel-central{
@@ -32,8 +40,8 @@
 }
 
 
-.panel-viewer .panel-body{
-  padding: 0px;
+.panel-body{
+  padding: 2px;
 }
 
 #viewer{
@@ -59,6 +67,11 @@
 body, html, .container-fluid {
      height: 100%;
 }
+body{
+  font-size: 12px;
+}
+
+
 
 .col-hidden {
   display: none;
@@ -74,7 +87,7 @@ td {margin: 0; padding: 0;}
 	text-align: center;
 	z-index: 100;
 	display:block;
-  font-size: 24px;
+  font-size: 14px;
   color: black;
 }
 
@@ -90,6 +103,9 @@ td {margin: 0; padding: 0;}
 
 #piece-editor .input-group{
   width: 100%;
+}
+#piece-editor .form-control{
+  padding: 6px 0px;
 }
 
 .bootstrap-table .fixed-table-container {

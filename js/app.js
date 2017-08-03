@@ -112,9 +112,13 @@ var options = {
   piecesTable: '#table-pieces',
   viewer: tool,
   viewerOptions: {
-    labels   : '#input-labels',
-    grid     : '#grid-check',
-    rotation : '#rotate-check',
+    labels     : '#input-labels',
+    grid       : '#grid-check',
+    rotation   : '#rotate-check',
+    dimensions : '#input-dimensions',
+  },
+  cameraOptions : {
+    view : '.camera-view-option',
   },
   pieceEditor: {
     editor : '#piece-editor',
@@ -257,7 +261,7 @@ function loadModel(modelsToLoad){
 
         //tool.addModel({tag: model.tag, });
         editor.appendModel(model);
-
+        console.log(model);
         appData.models[model.tag] = model;
         appData.models[model.tag].pieces = parsedData;
         // setModelOnPiecesTable(model);

@@ -90,8 +90,17 @@ $('#btn-export-gif').on('click', function(){
   });
 });
 
-$('#viewer-options').on('change', 'input', function(){
+$('.viewer-options').on('change', 'input', function(){
   editor.updateViewer();
+})
+
+$('.camera-view-option').change(function(evt){
+  var value = $(evt.currentTarget).is(':checked');
+  $('.camera-view-option').removeProp('checked');
+  if (value){
+    $(evt.currentTarget).prop('checked', 'checked');
+  }
+  editor.updateCamera();
 })
 
 $('#btn-create-room').on('change', function (evt){

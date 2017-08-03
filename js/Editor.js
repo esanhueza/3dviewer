@@ -5,9 +5,11 @@ class Editor{
     this.pieceEditor   = {}; // cada uno de los inputs que conforman el editor de piezas
     this.modelEditor   = {}; // cada uno de los inputs que conforman el editor de piezas
     this.viewerOptions = {}; // cada uno de los inputs que conforman las opciones del visor 3D
+    this.cameraOptions = {}; // cada uno de los inputs que conforman las opciones del visor 3D
     this.initPieceEditor(options.pieceEditor);
     this.initModelEditor(options.modelEditor);
     this.initViewerOptions(options.viewerOptions);
+    this.initCameraOptions(options.cameraOptions);
     this.models = {};
     this.viewer = options.viewer;
     this.selectedModel  = null;
@@ -19,6 +21,14 @@ class Editor{
     for (var item in items) {
       if (items.hasOwnProperty(item)) {
         this.viewerOptions[item] = $(items[item]);
+      }
+    }
+  }
+
+  initCameraOptions(items){
+    for (var item in items) {
+      if (items.hasOwnProperty(item)) {
+        this.cameraOptions[item] = $(items[item]);
       }
     }
   }
@@ -177,12 +187,21 @@ class Editor{
   }
 
   updateViewer(){
-    let showLabels = this.viewerOptions.labels.is(':checked');
-    let showGrid   = this.viewerOptions.grid.is(':checked');
-    let rotate     = this.viewerOptions.rotation.is(':checked');
+    let showLabels     = this.viewerOptions.labels.is(':checked');
+    let showGrid       = this.viewerOptions.grid.is(':checked');
+    let rotate         = this.viewerOptions.rotation.is(':checked');
+    let showDimensions = this.viewerOptions.dimensions.is(':checked');
     this.viewer.showLabels(showLabels);
     this.viewer.toggleGrid(showGrid);
     this.viewer.toggleRotation(rotate);
+    this.viewer.showDimensions(showDimensions, this.selectedModel);
+  }
+
+  updateCamera(){
+    this.viewer.clearOrthographicCamera();
+    if (this.cameraOptions.view.filter(':checked').length > 0){
+      this.viewer.cameraOrthographicFront(this.selectedModel);
+    }
   }
 
   exportPattern(){
