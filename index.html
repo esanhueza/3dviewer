@@ -144,67 +144,83 @@
           <div class="panel panel-default panel-top">
             <div class="panel-body">
 
-              <div class="btn-group camera-options">
-                <button type="button" class="btn btn-primary dropdown-toggle" data-placeholder="false" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Cámara <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                  <li class="dropdown-submenu">
-                    <a href="#" tabindex="-1" data-toggle="dropdown"> Vista</a>
-                    <ul class="dropdown-menu">
-                      <li>
-                        <input type="checkbox" data-view="front" id="camera-view-front" class="camera-view-option"><label for="camera-view-front"> Frontal</label>
-                      </li>
-                      <li>
-                        <input type="checkbox" data-view="back" id="camera-view-back" class="camera-view-option"><label for="camera-view-back"> Atras</label>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
+              <div class="btn-group btn-group-sm">
+                <div class="btn-group camera-options">
+                  <button type="button" class="btn btn-primary dropdown-toggle" data-placeholder="false" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Cámara <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-submenu">
+                      <a href="#" tabindex="-1" data-toggle="dropdown"> Vista</a>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <input type="checkbox" data-view="front" id="camera-view-front" class="camera-view-option"><label for="camera-view-front"> Frontal</label>
+                        </li>
+                        <li>
+                          <input type="checkbox" data-view="back" id="camera-view-back" class="camera-view-option"><label for="camera-view-back"> Atras</label>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Single button -->
+                <div class="viewer-options btn-group">
+                  <button type="button" class="btn btn-primary dropdown-toggle" data-placeholder="false" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Visor <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <input type="checkbox" id="rotate-check"><label for="rotate-check">Rotar camara</label>
+                    </li>
+                    <li>
+                      <input type="checkbox" id="grid-check"><label for="grid-check">Rejilla</label>
+                    </li>
+                    <li class="dropdown-submenu"><a href="#" tabindex="-1" data-toggle="dropdown"> Vista</a>
+                      <ul class="dropdown-menu">
+                        <li><a id="camera-z" tabindex="-1"> Cámara frontal</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="viewer-options btn-group">
+                  <button type="button" class="btn btn-primary dropdown-toggle" data-placeholder="false" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Etiquetas <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <input type="checkbox" id="input-labels"><label for="input-labels">Modulos</label>
+                    </li>
+                    <li>
+                      <input type="checkbox" id="input-dimensions"><label for="input-dimensions">Medidas</label>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
-              <!-- Single button -->
               <div class="viewer-options btn-group">
                 <button type="button" class="btn btn-primary dropdown-toggle" data-placeholder="false" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Visor <span class="caret"></span>
+                  <i class="fa fa-adjust"></i> Iluminación <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu noclose" >
                   <li>
-                    <input type="checkbox" id="rotate-check"><label for="rotate-check">Rotar camara</label>
-                  </li>
-                  <li>
-                    <input type="checkbox" id="grid-check"><label for="grid-check">Rejilla</label>
-                  </li>
-                  <li class="dropdown-submenu"><a href="#" tabindex="-1" data-toggle="dropdown"> Vista</a>
-                    <ul class="dropdown-menu">
-                      <li><a id="camera-z" tabindex="-1"> Cámara frontal</a></li>
-                    </ul>
+                    <input type="range" id="input-main-light" value="1" max="1" min="0" step="0.1">
                   </li>
                 </ul>
               </div>
 
               <div class="viewer-options btn-group">
                 <button type="button" class="btn btn-primary dropdown-toggle" data-placeholder="false" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Etiquetas <span class="caret"></span>
+                  <i class="fa fa-tint"></i> Bordes <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu noclose" >
                   <li>
-                    <input type="checkbox" id="input-labels"><label for="input-labels">Modulos</label>
-                  </li>
-                  <li>
-                    <input type="checkbox" id="input-dimensions"><label for="input-dimensions">Medidas</label>
+                    <input type="color" id="edge-color" name="color" value="#ffffff">
                   </li>
                 </ul>
               </div>
 
-              <div class="col-xs-12 col-md-2">
-                <label for="grid-check"> <span class="glyphicon glyphicon-adjust"></span> Luz</label>
-                <input type="range" id="input-main-light" value="1" max="1" min="0" step="0.1">
-              </div>
-              <div class="col-xs-12 col-md-2">
-                <label for="grid-check"> <span class="glyphicon glyphicon-tint"></span> Borde</label>
-                <input type="color" id="edge-color" name="color" value="#ffffff">
-              </div>
 
                 <!-- <div class="btn-group pull-right">
                   <input type="range" id="piece-scale" name="scale" step="0.01" max="1" min="0.9" value="0.98"> Llenado

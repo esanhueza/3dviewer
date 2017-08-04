@@ -112,18 +112,19 @@ class Viewer {
   }
 
   removeRoom(){
-    this.scene.remove(this.room.getMesh())
+    this.lights.remove(this.room.light);
+    this.scene.remove(this.room.getMesh());
     this.room = null;
   }
 
   createRoom(w,h,l, options){
     if (this.room){
-      this.removeRoom()
+      this.removeRoom();
     }
-    this.room = new Room(w,h,l, options);
+    this.room = new Room(w, h, l, options);
     this.room.avaliableObjects = this.objects;
     this.scene.add(this.room.getMesh());
-    this.addLight(w*this.scaleFactor*0.9, h*this.scaleFactor*0.9, l*this.scaleFactor*0.9);
+    this.room.light = this.addLight( w*this.scaleFactor*0.9, h*this.scaleFactor*0.9, l*this.scaleFactor*0.9 );
     return this.room;
   }
 
@@ -139,11 +140,9 @@ class Viewer {
 
   addLight(x,y,z){
     var light = new THREE.PointLight(0xffffff, 1);
-    var helper = new THREE.PointLightHelper(light, 1000 * this.scaleFactor);
     light.position.set(x, y, z);
     this.lights.add(light);
-    this.lights.add(helper);
-
+    return light;
   }
 
   createModels(data){
